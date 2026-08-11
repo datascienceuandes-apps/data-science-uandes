@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipo de Ciencia de Datos — Proceso y Metodologías</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F5F1;
+    --paper-dim:#E9EAE3;
+    --card:#FFFFFF;
+    --ink:#1C2321;
+    --ink-soft:#5A6058;
+    --line:#D9DAD2;
+
+    --teal:#145C54;
+    --teal-soft:#DCEAE7;
+    --indigo:#34407B;
+    --indigo-soft:#E1E3F0;
+    --amber:#A8791A;
+    --amber-soft:#F3E8CE;
+    --coral:#A83D2E;
+    --coral-soft:#F2DFDA;
+
+    --serif:'Fraunces', serif;
+    --sans:'IBM Plex Sans', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+  }
+  a{color:inherit;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding:28px clamp(16px,4vw,48px) 0;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--teal);
+    letter-spacing:.04em;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-style:italic;
+    font-size:clamp(26px,3.4vw,38px);
+    margin:0 0 8px;
+  }
+  .subhead{
+    color:var(--ink-soft);
+    max-width:62ch;
+    font-size:14.5px;
+    margin-bottom:22px;
+  }
+  .subhead code{
+    font-family:var(--mono);
+    background:var(--paper-dim);
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:12.5px;
+  }
+
+  /* ---------- Tab bar (editor-style) ---------- */
+  .tabbar{
+    display:flex;
+    flex-wrap:wrap;
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    margin-top:10px;
+    overflow:hidden;
+  }
+  .tab{
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:11px 16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    border-right:1px solid var(--line);
+    background:transparent;
+    user-select:none;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab.active{
+    background:var(--paper);
+    color:var(--ink);
+    font-weight:600;
+    box-shadow:inset 0 -2px 0 var(--dotcolor,var(--teal));
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--dotcolor,var(--teal));flex:none;}
+
+  main{
+    padding:0 clamp(16px,4vw,48px) 60px;
+  }
+  section.panel{
+    display:none;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 10px 10px;
+    padding:clamp(18px,3vw,34px);
+  }
+  section.panel.active{display:block;}
+
+  h2.panel-title{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 4px;
+  }
+  p.panel-desc{
+    color:var(--ink-soft);
+    font-size:14px;
+    max-width:70ch;
+    margin:0 0 28px;
+  }
+
+  /* ---------- Flow diagram ---------- */
+  .flow{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    flex-wrap:wrap;
+  }
+  .flow-step{flex:1 1 200px; display:flex; align-items:stretch;}
+  .stage-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    width:100%;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease;
+    border-top:3px solid var(--card-color, var(--teal));
+  }
+  .stage-card:hover{box-shadow:0 4px 14px rgba(28,35,33,.08); transform:translateY(-1px);}
+  .stage-card:focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+  .stage-num{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--card-color, var(--teal));
+    font-weight:600;
+  }
+  .stage-title{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:16.5px;
+    margin:4px 0 6px;
+  }
+  .stage-summary{font-size:13px; color:var(--ink-soft); margin:0;}
+  .stage-states{margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:2px 8px;
+    border-radius:20px;
+    background:var(--paper-dim);
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+  .arrow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 6px;
+    color:var(--ink-soft);
+    font-family:var(--mono);
+    font-size:18px;
+    flex:0 0 auto;
+  }
+  @media (max-width:820px){
+    .flow{flex-direction:column;}
+    .arrow{transform:rotate(90deg); padding:6px 0;}
+  }
+
+  .detail-panel{
+    display:none;
+    margin-top:16px;
+    padding:16px 18px;
+    border-radius:var(--radius);
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .detail-panel.open{display:block;}
+
+  .branches{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:22px;
+  }
+  .branch{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:600;
+  }
+  .branch.finalizado{background:var(--teal-soft); color:var(--teal);}
+  .branch.derivado{background:var(--indigo-soft); color:var(--indigo);}
+  .branch.detenido{background:var(--amber-soft); color:var(--amber);}
+  .branch.desistido{background:var(--coral-soft); color:var(--coral);}
+
+  /* ---------- Catalog ---------- */
+  .filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:22px;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .filter-group label.group-label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .filter-chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .filter-chip{
+    font-family:var(--mono);
+    font-size:11.5px;
+    padding:5px 11px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .filter-chip.active{background:var(--teal); color:#fff; border-color:var(--teal);}
+  .search-box{
+    flex:1 1 220px;
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-family:var(--sans);
+    font-size:13.5px;
+    background:var(--paper);
+  }
+  .search-box input:focus{outline:2px solid var(--teal);}
+
+  .catalog-count{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-bottom:14px;}
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+  }
+  .method-card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:15px;
+    background:var(--paper);
+  }
+  .method-name{font-family:var(--serif); font-weight:600; font-size:15px; margin:0 0 6px;}
+  .method-tags{display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px;}
+  .tag{font-family:var(--mono); font-size:10px; padding:2px 7px; border-radius:20px;}
+  .tag.tipo{background:var(--teal-soft); color:var(--teal);}
+  .tag.area{background:var(--indigo-soft); color:var(--indigo);}
+  .method-desc{font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;}
+  .method-example{font-size:11.5px; color:var(--ink-soft); font-style:italic;}
+
+  /* ---------- Roadmap ---------- */
+  .roadmap-col{margin-bottom:30px;}
+  .roadmap-heading{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:1px dashed var(--line);
+  }
+  .roadmap-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;}
+  .roadmap-card{
+    border:1px solid var(--line);
+    border-left:3px solid var(--amber);
+    border-radius:8px;
+    padding:14px;
+    background:var(--paper);
+  }
+  .roadmap-title{font-weight:600; font-size:13.5px; margin:0 0 6px;}
+  .roadmap-desc{font-size:12.5px; color:var(--ink-soft); margin:0;}
+
+  /* ---------- Glossary ---------- */
+  table.glossary{width:100%; border-collapse:collapse; font-size:13px;}
+  table.glossary th{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  table.glossary td{
+    padding:10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  .state-name{font-weight:600; font-family:var(--mono); font-size:12.5px;}
+
+  .score-fields{margin-top:26px;}
+  .score-fields h3{font-family:var(--serif); font-size:16px; font-style:italic; margin-bottom:10px;}
+
+  /* ---------- Metrics ---------- */
+  .metrics-total{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:26px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .metrics-total strong{color:var(--ink); font-size:20px; font-family:var(--serif); font-style:italic;}
+  .metrics-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:30px;
+  }
+  .metric-heading{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 14px;
+  }
+  .bar-row{margin-bottom:10px;}
+  .bar-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    margin-bottom:4px;
+  }
+  .bar-label .n{font-family:var(--mono); color:var(--ink-soft);}
+  .bar-track{
+    height:8px;
+    background:var(--paper-dim);
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .bar-fill{height:100%; border-radius:20px; background:var(--teal);}
+
+  #proyectos-table{min-width:1346px; table-layout:fixed; border-collapse:separate; border-spacing:0;}
+  #proyectos-table th, #proyectos-table td{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  #proyectos-table td.proceso-cell{white-space:normal; overflow:visible; text-overflow:clip;}
+  #proyectos-table .email-cell{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); white-space:nowrap;}
+  #proyectos-table .codigo-cell{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
+  #proyectos-table .freeze-col{position:sticky; background:var(--card); z-index:2;}
+  #proyectos-table thead .freeze-col{z-index:3; background:var(--paper-dim);}
+  #proyectos-table .freeze-col-1{left:0;}
+  #proyectos-table .freeze-col-2{left:64px;}
+  #proyectos-table .freeze-col-3{left:156px; box-shadow:2px 0 4px rgba(28,35,33,.08);}
+  .estado-chip{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .estado-chip.finalizado{background:var(--teal-soft); color:var(--teal);}
+  .estado-chip.desistido, .estado-chip.detenido{background:var(--coral-soft); color:var(--coral);}
+  .estado-chip.enespera, .estado-chip.enproceso{background:var(--amber-soft); color:var(--amber);}
+  .estado-chip.derivado, .estado-chip.sininformacion{background:var(--indigo-soft); color:var(--indigo);}
+
+  .recurrencia-box{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:22px; padding-top:20px; border-top:1px dashed var(--line);}
+  .rec-kpi{border:1px solid var(--line); border-left:4px solid var(--indigo); border-radius:var(--radius); padding:14px 16px; background:var(--paper);}
+  .rec-kpi .n{font-family:var(--serif); font-size:30px; font-weight:600; color:var(--indigo); display:block; line-height:1;}
+  .rec-kpi .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:8px; display:block;}
+  .rec-kpi .lbl em{font-size:11.5px; opacity:.85;}
+
+  /* ---------- Gestión / SLA ---------- */
+  .sla-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:18px;}
+  .sla-card{border:1px solid var(--line); border-left-width:4px; border-radius:var(--radius); padding:13px 15px; background:var(--paper);}
+  .sla-card .n{font-family:var(--serif); font-size:26px; font-weight:600; line-height:1;}
+  .sla-card .lbl{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-top:6px; display:block;}
+  .sla-card.vencido{border-left-color:var(--coral);} .sla-card.vencido .n{color:var(--coral);}
+  .sla-card.porvencer{border-left-color:var(--amber);} .sla-card.porvencer .n{color:var(--amber);}
+  .sla-card.aldia{border-left-color:var(--teal);} .sla-card.aldia .n{color:var(--teal);}
+  .sla-card.pausado{border-left-color:var(--ink-soft);} .sla-card.pausado .n{color:var(--ink-soft);}
+  .sla-card.cancha{border-left-color:var(--indigo);} .sla-card.cancha .n{color:var(--indigo);}
+  .dias-chip.pausado{background:var(--paper-dim); color:var(--ink-soft);}
+  #sla-table{min-width:1275px; table-layout:fixed; border-collapse:separate; border-spacing:0;}
+  #sla-table th, #sla-table td{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:top;}
+  #sla-table td.accion-cell{white-space:normal; overflow:visible; font-size:12.5px;}
+  #sla-table .codigo-cell{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
+  #sla-table .fecha-cell{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
+  #sla-table tr.row-vencido{background:var(--coral-soft);}
+  .dias-chip{font-family:var(--mono); font-size:11.5px; font-weight:600; padding:3px 8px; border-radius:20px;}
+  .dias-chip.vencido{background:var(--coral); color:#fff;}
+  .dias-chip.porvencer{background:var(--amber-soft); color:var(--amber);}
+  .dias-chip.aldia{background:var(--teal-soft); color:var(--teal);}
+  .cancha-tag{display:inline-block; font-family:var(--mono); font-size:9.5px; padding:1px 6px; border-radius:20px; background:var(--indigo-soft); color:var(--indigo); margin-left:5px;}
+  .desfase-tag{display:block; font-family:var(--mono); font-size:9.5px; color:var(--coral); margin-top:3px;}
+  .sla-note{font-size:12px; color:var(--ink-soft); font-style:italic; margin-top:14px;}
+  .flow-ciclo{margin-top:8px; font-family:var(--mono); font-size:10.5px; color:var(--amber); background:var(--amber-soft); border-radius:20px; padding:3px 9px; display:inline-block;}
+  .stage-sla{margin-top:8px; font-family:var(--mono); font-size:10px; color:var(--coral); text-transform:uppercase; letter-spacing:.04em;}
+
+  .proceso-cell{font-size:12.5px; max-width:280px;}
+  .gestionar-flag{display:inline-block;margin-top:4px;font-size:.72rem;font-weight:600;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.sin-doc{color:var(--ink-soft); font-style:italic;}
+  .doc-link{font-family:var(--mono); font-size:11px; color:var(--teal); text-decoration:none;}
+  .doc-link:hover{text-decoration:underline;}
+
+  footer{
+    padding:20px clamp(16px,4vw,48px);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">// equipo-data-science / proceso.md</div>
+  <h1>Cómo trabajamos las solicitudes de apoyo en datos</h1>
+  <p class="subhead">
+    Documento vivo del equipo: mapa del proceso, catálogo de metodologías aplicadas y hoja de ruta de
+    tareas por explorar. Editable directamente aquí — los datos viven en el bloque
+    <code>&lt;script&gt;</code> al final del archivo, en los arrays <code>PROCESO</code>,
+    <code>METODOLOGIAS</code>, <code>ROADMAP</code> y <code>ESTADOS</code>.
+  </p>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab active" data-tab="proceso" style="--dotcolor:var(--teal)" role="tab"><span class="dot"></span>proceso.flow</button>
+    <button class="tab" data-tab="catalogo" style="--dotcolor:var(--indigo)" role="tab"><span class="dot"></span>catalogo.metodologias</button>
+    <button class="tab" data-tab="roadmap" style="--dotcolor:var(--amber)" role="tab"><span class="dot"></span>futuro.roadmap</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ TAB 1: PROCESO ============ -->
+  <section class="panel active" id="panel-proceso">
+    <h2 class="panel-title">Flujo completo de una solicitud</h2>
+    <p class="panel-desc">Desde que un investigador completa el formulario hasta el cierre del requerimiento. Haz clic en cada etapa para ver el detalle.</p>
+
+    <div class="flow" id="flow-container"></div>
+
+    <div class="branches" id="branches-container"></div>
+  </section>
+
+  <!-- ============ TAB 2: CATALOGO ============ -->
+  <section class="panel" id="panel-catalogo">
+    <h2 class="panel-title">Catálogo de metodologías aplicadas</h2>
+    <p class="panel-desc">Filtra por tipo de apoyo, por área temática, o busca por palabra clave. Refleja lo que el equipo ya ha ejecutado en solicitudes reales.</p>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label class="group-label">Tipo de apoyo</label>
+        <div class="filter-chips" id="filter-tipo"></div>
+      </div>
+      <div class="filter-group">
+        <label class="group-label">Área temática</label>
+        <div class="filter-chips" id="filter-area"></div>
+      </div>
+      <div class="filter-group search-box">
+        <label class="group-label">Buscar</label>
+        <input type="text" id="search-input" placeholder="ej. multinivel, redes, tamaño muestral…">
+      </div>
+    </div>
+
+    <div class="catalog-count" id="catalog-count"></div>
+    <div class="card-grid" id="catalog-grid"></div>
+  </section>
+
+  <!-- ============ TAB 3: ROADMAP ============ -->
+  <section class="panel" id="panel-roadmap">
+    <h2 class="panel-title">Tareas que el equipo podría abarcar</h2>
+    <p class="panel-desc">Líneas de trabajo no cubiertas hoy (o cubiertas parcialmente), organizadas por horizonte de implementación.</p>
+    <div id="roadmap-container"></div>
+  </section>
+
+</main>
+
+<footer>Equipo Ciencia de Datos · Proyecto BiCI · Dirección de Innovación · Universidad de los Andes.</footer>
+
+<script>
+/* =========================================================================
+   DATOS EDITABLES — actualiza estos arrays cuando cambien tus procesos,
+   metodologías o prioridades. Todo lo demás en este archivo solo renderiza
+   esta información.
+   ========================================================================= */
+
+const PROCESO = [
+  {
+    numero: '01',
+    color: 'var(--indigo)',
+    titulo: 'Recepción de la solicitud',
+    resumen: 'El investigador completa el formulario electrónico y la fila aparece automáticamente en el Excel vinculado.',
+    detalle: '<strong>Entrada:</strong> formulario Microsoft Forms. <strong>Salida:</strong> fila nueva en la hoja "Nuevo" con Id correlativo, datos del proyecto, financiamiento, tipo de apoyo y disponibilidad de datos.<br><br>Aquí solo se verifica que la fila esté completa. Si la solicitud llegó por correo o en una reunión sin pasar por el formulario, se le pide al investigador que lo complete: sin fila en el Excel no hay trazabilidad ni reloj. <strong>SLA:</strong> no aplica — es el punto de partida del cronómetro.',
+    estados: ['Recepción']
+  },
+  {
+    numero: '02',
+    color: 'var(--teal)',
+    titulo: 'Respuesta al correo de inicio',
+    resumen: 'Se acusa recibo, se aclaran dudas del requerimiento y se propone fecha de reunión.',
+    detalle: '<strong>Entrada:</strong> fila nueva del formulario. <strong>Salida:</strong> correo enviado al investigador con horarios propuestos.<br><br>Es el primer compromiso visible del equipo y lo que evita que una solicitud quede silenciosa. <strong>SLA: 5 días corridos desde la recepción.</strong> Superado ese plazo, el requerimiento aparece en rojo en la pestaña <em>gestion.sla</em>.',
+    estados: ['En espera'],
+    sla: '5 días desde la recepción'
+  },
+  {
+    numero: '03',
+    color: 'var(--teal)',
+    titulo: 'Reunión de inicio',
+    resumen: 'Se acuerda alcance, entregables, metodología tentativa y quién entrega los datos.',
+    detalle: '<strong>Entrada:</strong> correo de respuesta con horarios. <strong>Salida:</strong> alcance acordado, lista de datos a recibir y responsable de entregarlos.<br><br>Aquí se completan los campos de priorización del Excel — Disponibilidad de datos, Tipo de producto I+D, Dificultad, Urgencia y Jerarquía — que producen el <strong>Puntaje final</strong>. Un requerimiento sin Puntaje final no entra a la cola de priorización: es el síntoma de que esta etapa quedó incompleta.',
+    estados: ['En espera', 'No iniciado']
+  },
+  {
+    numero: '04',
+    color: 'var(--amber)',
+    titulo: 'Registro de la comunicación',
+    resumen: 'Se deja constancia en el Excel y se guardan los datos recibidos en la carpeta del investigador.',
+    detalle: '<strong>Entrada:</strong> acuerdos de la reunión y bases de datos del investigador. <strong>Salida:</strong> Comentario #1 y Fecha última interacción actualizados, carpeta creada en SharePoint.<br><br>Este paso es el que sostiene todo el seguimiento: si no se registra, el semáforo de gestión trabaja con información falsa y aparecen alarmas de casos que sí estaban avanzando. También es el punto donde se detecta que el investigador todavía no entrega los datos — en ese caso corresponde marcar <em>Detenido</em> y no dejar correr el reloj de procesamiento.',
+    estados: ['En espera', 'Detenido']
+  },
+  {
+    numero: '05',
+    color: 'var(--teal)',
+    titulo: 'Análisis y procesamiento',
+    resumen: 'Preprocesamiento, análisis estadístico y visualización según lo acordado. Una sola persona ejecuta: la cola es secuencial.',
+    detalle: '<strong>Entrada:</strong> datos recibidos y alcance acordado. <strong>Salida:</strong> código reproducible (Rmarkdown / Quarto) y resultados.<br><br><strong>SLA: 10 días corridos desde la última interacción registrada.</strong> Si se supera sin avance ni comunicación, el requerimiento aparece como procesamiento estancado. Como hay una sola analista, lo que suele fallar no es la capacidad técnica sino la visibilidad de la cola: por eso el reloj mide silencio, no esfuerzo.',
+    estados: ['En proceso', 'Detenido'],
+    sla: '10 días desde la última interacción'
+  },
+  {
+    numero: '06',
+    color: 'var(--amber)',
+    titulo: 'Entrega y retroalimentación',
+    resumen: 'Se envía el informe Word y se abre un ciclo: el investigador puede pedir nuevos análisis o cambios específicos.',
+    detalle: '<strong>Entrada:</strong> resultados del análisis. <strong>Salida:</strong> informe <code>.docx</code> en la carpeta del investigador en SharePoint, con fecha en el nombre, más el correo o la reunión de explicación.<br><br><strong>Esta etapa no es terminal.</strong> Cada solicitud de cambios o de análisis adicionales reabre la etapa 05, se registra como una nueva interacción y reinicia el reloj de 10 días. Pueden ocurrir varios ciclos antes del cierre. Cada vuelta deja un <code>.docx</code> nuevo: el enlace del registro de proyectos debe apuntar siempre al más reciente, nunca a una copia intermedia.',
+    estados: ['En proceso'],
+    ciclo: '↺ Nuevos análisis o cambios → vuelve a la etapa 05'
+  },
+  {
+    numero: '07',
+    color: 'var(--coral)',
+    titulo: 'Cierre',
+    resumen: 'El investigador aprueba los resultados sin nuevas observaciones, o el requerimiento termina por otra vía.',
+    detalle: '<strong>Entrada:</strong> informe aprobado, sin nuevas observaciones tras el último ciclo. <strong>Salida:</strong> correo de cierre, estado final en el Excel y enlace definitivo al informe en el registro de proyectos.<br><br>No todos los cierres son por aprobación: también se cierra por derivación a otra entidad, detención por factores externos o abandono del investigador. Cada camino queda registrado como estado final y deja de contar para el semáforo de gestión.<br><br><strong>Regla:</strong> todo cierre por desistimiento necesita evidencia escrita. Si el investigador lo comunica verbalmente o en una reunión, envíale un correo breve confirmando que el requerimiento queda cerrado y por qué. Sin ese respaldo después es imposible explicar qué pasó con esa solicitud — hoy hay tres casos en esa situación.',
+    estados: ['Finalizado', 'Derivado', 'Detenido', 'Desistido']
+  },
+  {
+    numero: '08',
+    color: 'var(--indigo)',
+    titulo: 'Encuesta post-cierre',
+    resumen: 'Se envía una encuesta breve al investigador para medir calidad del servicio y recoger sugerencias.',
+    detalle: '<strong>Entrada:</strong> requerimiento cerrado como Finalizado. <strong>Salida:</strong> respuesta del investigador y, si corresponde, una acción de mejora registrada.<br><br>Se envía dentro de los 3 días siguientes al cierre, cuando la experiencia todavía está fresca. Mide cinco cosas: utilidad de los resultados, claridad de la explicación metodológica, tiempos de respuesta, disposición a volver a solicitar apoyo y a recomendarlo a un colega. Solo se envía en cierres por aprobación — no en Desistido ni Derivado, donde la conversación pertinente es otra.<br><br>Es también el insumo que cierra el círculo con la <strong>tasa de recurrencia</strong>: hoy 7 de 50 investigadores han vuelto a solicitar apoyo, y esta encuesta permite saber por qué los otros 43 no lo han hecho.',
+    estados: ['Finalizado'],
+    sla: '3 días desde el cierre'
+  }
+];
+
+const BRANCHES = [
+  {clase:'finalizado', label:'Finalizado — aprobado y cerrado'},
+  {clase:'derivado', label:'Derivado — a otra entidad'},
+  {clase:'detenido', label:'Detenido — por factores externos'},
+  {clase:'desistido', label:'Desistido — abandonado por el investigador'}
+];
+
+const TIPOS_APOYO = ['Gestión de datos','Preprocesamiento de datos','Análisis estadístico','Visualización de datos','Reporte de resultados'];
+const AREAS = ['Educación','Salud','Ciencias Sociales','Comunicación','Odontología','Innovación / Gestión interna'];
+
+const METODOLOGIAS = [
+  {nombre:'Fusión y armonización de bases de datos', tipo:'Gestión de datos', areas:['Ciencias Sociales','Salud'], desc:'Integración de bases con variables divergentes, resolviendo diferencias de codificación entre fuentes.', ejemplo:'Reconstrucción de ciclos de movilización histórica a partir de dos bases con distinta estructura.'},
+  {nombre:'Diseño de instrumentos de captura de datos', tipo:'Gestión de datos', areas:['Salud','Odontología'], desc:'Máscaras de entrada y plataformas tipo REDCap para estandarizar el registro clínico o de terreno.', ejemplo:'Registro prospectivo de pacientes en programas de enfermedad pulmonar difusa.'},
+  {nombre:'Cálculo de pesos poblacionales y factores de expansión', tipo:'Gestión de datos', areas:['Comunicación','Ciencias Sociales'], desc:'Ponderación de muestras para permitir comparaciones representativas entre grupos o países.', ejemplo:'Comparación de consumo informativo juvenil entre distintos países de la región.'},
+  {nombre:'Construcción de indicadores y tableros de gestión interna', tipo:'Gestión de datos', areas:['Innovación / Gestión interna'], desc:'Diseño de estructuras de datos e indicadores para portafolios internos de proyectos.', ejemplo:'Panel de portafolio de tecnologías del área de innovación.'},
+
+  {nombre:'Limpieza y detección de datos atípicos o faltantes', tipo:'Preprocesamiento de datos', areas:['Salud','Educación','Ciencias Sociales'], desc:'Diagnóstico de calidad de datos antes de cualquier análisis: outliers, missing, inconsistencias.', ejemplo:'Preparación de bases clínicas antes de un análisis descriptivo.'},
+  {nombre:'Codificación y elaboración de codebooks', tipo:'Preprocesamiento de datos', areas:['Ciencias Sociales','Salud'], desc:'Documentación de variables y categorías para asegurar reproducibilidad e interpretación correcta.', ejemplo:'Construcción de libro de códigos para escalas de autoeficacia.'},
+  {nombre:'Consolidación de múltiples fuentes', tipo:'Preprocesamiento de datos', areas:['Educación','Comunicación'], desc:'Unificación de encuestas, Google Sheets, PDFs escaneados y registros administrativos en un solo dataset.', ejemplo:'Consolidación de notas y uso de IA en evaluaciones presenciales y virtuales.'},
+  {nombre:'Cálculo de acuerdo entre evaluadores (Kappa)', tipo:'Preprocesamiento de datos', areas:['Ciencias Sociales'], desc:'Verificación de consistencia cuando dos o más personas codifican el mismo material cualitativo.', ejemplo:'Codificación de secuencias de interacción madre-hijo en lectura compartida.'},
+
+  {nombre:'Modelos de clases latentes (LCA)', tipo:'Análisis estadístico', areas:['Educación','Comunicación','Ciencias Sociales'], desc:'Identificación de perfiles no observados a partir de patrones de respuesta.', ejemplo:'Perfiles de estudiantes antes y después de la pandemia; perfiles de consumo de noticias.'},
+  {nombre:'Análisis factorial (exploratorio / confirmatorio) y fiabilidad', tipo:'Análisis estadístico', areas:['Educación','Salud'], desc:'Validación de estructura interna de instrumentos y cálculo de alfa de Cronbach.', ejemplo:'Validación de escalas de motivación y de instrumentos de vocabulario infantil.'},
+  {nombre:'Ecuaciones estructurales (SEM) con mediación/moderación', tipo:'Análisis estadístico', areas:['Ciencias Sociales'], desc:'Modelamiento de relaciones causales hipotéticas entre variables latentes y observadas.', ejemplo:'Relación entre autoeficacia, ambiente letrado y competencia narrativa en programas de lectura.'},
+  {nombre:'Modelos multinivel y de efectos mixtos', tipo:'Análisis estadístico', areas:['Educación','Salud'], desc:'Análisis de datos anidados (estudiantes en cursos, mediciones repetidas en pacientes).', ejemplo:'Modelamiento de puntajes matemáticos considerando anidamiento por establecimiento.'},
+  {nombre:'Modelos bayesianos espacio-temporales (BYM / INLA)', tipo:'Análisis estadístico', areas:['Salud'], desc:'Estimación de riesgo relativo con estructura espacial y temporal explícita.', ejemplo:'Determinantes socioeconómicos de mortalidad por COVID-19 a nivel comunal.'},
+  {nombre:'Modelos de supervivencia', tipo:'Análisis estadístico', areas:['Salud'], desc:'Análisis de tiempo hasta un evento, con censura.', ejemplo:'Evaluación de reacciones adversas a terapias oncológicas.'},
+  {nombre:'Machine learning predictivo / clasificación clínica', tipo:'Análisis estadístico', areas:['Salud','Odontología'], desc:'Modelos supervisados para apoyar decisiones diagnósticas o de tratamiento.', ejemplo:'Predicción de metástasis en cáncer oral; predicción de mucositis oral.'},
+  {nombre:'Análisis de redes sociales y epistémicas (SNA / ENA)', tipo:'Análisis estadístico', areas:['Educación','Innovación / Gestión interna'], desc:'Mapeo de conexiones, comunidades y roles estratégicos en interacciones o diálogos.', ejemplo:'Medición de impacto de un evento de emprendimiento; análisis de diálogos colaborativos.'},
+  {nombre:'Análisis secuencial y de lag', tipo:'Análisis estadístico', areas:['Educación'], desc:'Estudio del orden y encadenamiento de eventos o intervenciones a lo largo del tiempo.', ejemplo:'Secuencias de inicio-respuesta-seguimiento en lectura compartida de cuentos.'},
+  {nombre:'Propiedades diagnósticas (sensibilidad, especificidad, LR)', tipo:'Análisis estadístico', areas:['Salud'], desc:'Evaluación del desempeño de un instrumento frente a un gold standard clínico.', ejemplo:'Comparación de pruebas de tamizaje breve para demencia en atención primaria.'},
+  {nombre:'Distancia de Wasserstein y entropía de Shannon', tipo:'Análisis estadístico', areas:['Salud'], desc:'Comparación distribucional más allá de promedios, útil para señales biológicas sutiles.', ejemplo:'Comparación de respuestas celulares inducidas por vesículas extracelulares.'},
+  {nombre:'Invarianza de medición entre grupos', tipo:'Análisis estadístico', areas:['Educación'], desc:'Verifica si un instrumento mide lo mismo de la misma manera en distintos subgrupos.', ejemplo:'Comparación de la escala FIT-Choice entre hombres y mujeres.'},
+  {nombre:'Cálculo de tamaño muestral', tipo:'Análisis estadístico', areas:['Educación','Salud'], desc:'Estimación del N necesario para validar instrumentos o detectar efectos con potencia adecuada.', ejemplo:'Definición de muestra para validar un instrumento de vocabulario preescolar.'},
+  {nombre:'Matching y selección de grupos de control', tipo:'Análisis estadístico', areas:['Educación'], desc:'Construcción de grupos comparables para evaluaciones de impacto.', ejemplo:'Selección de grupo de control para un programa de electroescritura.'},
+
+  {nombre:'Dashboards interactivos (Power BI)', tipo:'Visualización de datos', areas:['Innovación / Gestión interna','Salud'], desc:'Tableros para exploración dinámica de indicadores y cruces de información.', ejemplo:'Dashboard de registros de investigación clínica interna.'},
+  {nombre:'Gráficos de alta calidad para publicación científica', tipo:'Visualización de datos', areas:['Educación','Salud','Comunicación'], desc:'Visualizaciones ajustadas a estándares editoriales de revistas científicas.', ejemplo:'Gráficos de relaciones entre variables de cobertura noticiosa.'},
+
+  {nombre:'Informes técnicos de cierre de requerimiento', tipo:'Reporte de resultados', areas:['Educación','Salud','Ciencias Sociales'], desc:'Documento final que resume metodología, resultados y recomendaciones.', ejemplo:'Informe de resultados para retroalimentación del investigador antes de publicación.'},
+  {nombre:'Redacción de sección de métodos para publicaciones', tipo:'Reporte de resultados', areas:['Salud','Educación'], desc:'Apoyo en la descripción metodológica exigida por revistas científicas.', ejemplo:'Sección de métodos de un estudio de determinantes socioeconómicos de mortalidad.'}
+];
+
+const ROADMAP = [
+  {
+    horizonte: 'Corto plazo',
+    items: [
+      {titulo:'Triage semi-automatizado con agentes', desc:'Uso de flujos tipo agente (OpenClaw) para pre-clasificar solicitudes entrantes por tipo de apoyo y sugerir un puntaje inicial.'},
+      {titulo:'Plantillas Quarto/R Markdown estandarizadas', desc:'Plantillas reproducibles por tipo de análisis frecuente (LCA, SEM, multinivel) para acelerar la primera entrega.'},
+      {titulo:'Checklist automatizado de calidad de datos', desc:'Validación de valores faltantes, duplicados y formatos antes de iniciar cualquier análisis.'}
+    ]
+  },
+  {
+    horizonte: 'Mediano plazo',
+    items: [
+      {titulo:'Paquete interno de funciones reutilizables', desc:'Catálogo versionado de funciones R/Python para los métodos más solicitados por el equipo.'},
+      {titulo:'Dashboard de gestión del equipo', desc:'Panel (Quarto Dashboard o Shiny) con carga de trabajo, tiempos de respuesta y estado de cada solicitud, alimentado por este mismo formulario.'},
+      {titulo:'Métodos causales para política pública', desc:'Incorporar diferencias en diferencias, RDD y variables instrumentales para estudios de impacto de programas.'}
+    ]
+  },
+  {
+    horizonte: 'Largo plazo',
+    items: [
+      {titulo:'Asistente basado en LLM para sugerencia metodológica', desc:'A partir de la descripción del proyecto, sugerir metodologías candidatas y un borrador de plan de análisis.'},
+      {titulo:'Línea de análisis geoespacial (GIS)', desc:'Para estudios con datos comunales o territoriales, extendiendo los modelos espacio-temporales ya usados en salud.'},
+      {titulo:'Servicio de meta-análisis y síntesis de evidencia', desc:'Para líneas de investigación recurrentes del equipo (ej. lectura compartida, evaluaciones tipo Dialect).'},
+      {titulo:'NLP para respuestas abiertas de encuestas', desc:'Procesamiento automático de preguntas abiertas a gran escala, con codificación asistida.'}
+    ]
+  }
+];
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+// --- Proceso ---
+const flowContainer = document.getElementById('flow-container');
+PROCESO.forEach((stage, idx)=>{
+  const step = document.createElement('div');
+  step.className = 'flow-step';
+  step.innerHTML = `
+    <div class="stage-card" style="--card-color:${stage.color}" tabindex="0" role="button" aria-expanded="false">
+      <div class="stage-num">${stage.numero}</div>
+      <div class="stage-title">${stage.titulo}</div>
+      <p class="stage-summary">${stage.resumen}</p>
+      <div class="stage-states">${stage.estados.map(e=>`<span class="chip">${e}</span>`).join('')}</div>
+      ${stage.sla ? `<div class="stage-sla">SLA · ${stage.sla}</div>` : ''}
+      ${stage.ciclo ? `<div class="flow-ciclo">${stage.ciclo}</div>` : ''}
+      <div class="detail-panel">${stage.detalle}</div>
+    </div>`;
+  const card = step.querySelector('.stage-card');
+  const detail = step.querySelector('.detail-panel');
+  function toggle(){
+    const open = detail.classList.toggle('open');
+    card.setAttribute('aria-expanded', open);
+  }
+  card.addEventListener('click', toggle);
+  card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+  flowContainer.appendChild(step);
+
+  if(idx < PROCESO.length-1){
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow';
+    arrow.textContent = '→';
+    flowContainer.appendChild(arrow);
+  }
+});
+
+const branchesContainer = document.getElementById('branches-container');
+BRANCHES.forEach(b=>{
+  const el = document.createElement('div');
+  el.className = 'branch ' + b.clase;
+  el.textContent = b.label;
+  branchesContainer.appendChild(el);
+});
+
+// --- Catálogo ---
+let activeTipo = 'Todas';
+let activeArea = 'Todas';
+let searchText = '';
+
+function renderCatalog(){
+  const grid = document.getElementById('catalog-grid');
+  const countEl = document.getElementById('catalog-count');
+  const filtered = METODOLOGIAS.filter(m=>{
+    const tipoMatch = activeTipo==='Todas' || m.tipo===activeTipo;
+    const areaMatch = activeArea==='Todas' || m.areas.includes(activeArea);
+    const textMatch = !searchText || (m.nombre+' '+m.desc).toLowerCase().includes(searchText.toLowerCase());
+    return tipoMatch && areaMatch && textMatch;
+  });
+  countEl.textContent = filtered.length + ' de ' + METODOLOGIAS.length + ' metodologías';
+  grid.innerHTML = filtered.map(m=>`
+    <div class="method-card">
+      <div class="method-name">${m.nombre}</div>
+      <div class="method-tags">
+        <span class="tag tipo">${m.tipo}</span>
+        ${m.areas.map(a=>`<span class="tag area">${a}</span>`).join('')}
+      </div>
+      <p class="method-desc">${m.desc}</p>
+      <p class="method-example">Ejemplo: ${m.ejemplo}</p>
+    </div>`).join('');
+}
+
+function setupFilters(){
+  const tipoContainer = document.getElementById('filter-tipo');
+  const areaContainer = document.getElementById('filter-area');
+
+  function draw(){
+    renderFilterChipsSimple(tipoContainer, TIPOS_APOYO, activeTipo, (val)=>{ activeTipo=val; draw(); });
+    renderFilterChipsSimple(areaContainer, AREAS, activeArea, (val)=>{ activeArea=val; draw(); });
+    renderCatalog();
+  }
+  draw();
+}
+
+function renderFilterChipsSimple(container, items, active, onClick){
+  container.innerHTML = '';
+  ['Todas', ...items].forEach(item=>{
+    const chip = document.createElement('button');
+    chip.className = 'filter-chip' + (item===active ? ' active' : '');
+    chip.textContent = item;
+    chip.addEventListener('click', ()=>onClick(item));
+    container.appendChild(chip);
+  });
+}
+
+document.getElementById('search-input').addEventListener('input', (e)=>{
+  searchText = e.target.value;
+  renderCatalog();
+});
+
+setupFilters();
+
+// --- Roadmap ---
+const roadmapContainer = document.getElementById('roadmap-container');
+ROADMAP.forEach(group=>{
+  const col = document.createElement('div');
+  col.className = 'roadmap-col';
+  col.innerHTML = `
+    <div class="roadmap-heading">${group.horizonte}</div>
+    <div class="roadmap-grid">
+      ${group.items.map(i=>`
+        <div class="roadmap-card">
+          <p class="roadmap-title">${i.titulo}</p>
+          <p class="roadmap-desc">${i.desc}</p>
+        </div>`).join('')}
+    </div>`;
+  roadmapContainer.appendChild(col);
+});
+
+
+</script>
+</body>
+</html>
