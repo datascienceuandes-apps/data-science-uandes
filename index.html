@@ -283,6 +283,16 @@
   .method-desc{font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;}
   .method-example{font-size:11.5px; color:var(--ink-soft); font-style:italic;}
 
+  .curso-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:13px; margin-bottom:22px;}
+  .curso-kpi{border:1px solid var(--line); border-top:3px solid var(--teal); border-radius:var(--radius); padding:14px 16px; background:var(--paper);}
+  .curso-kpi .n{font-family:var(--serif); font-size:28px; font-weight:600; color:var(--teal); display:block; line-height:1;}
+  .curso-kpi .lbl{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-top:7px; display:block;}
+  .curso-card{border:1px solid var(--line); border-left:4px solid var(--indigo); border-radius:var(--radius); padding:15px 18px; background:var(--paper); margin-bottom:12px;}
+  .curso-card .cn{font-family:var(--serif); font-size:15.5px; font-weight:600; margin:0 0 4px;}
+  .curso-card .cm{font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-bottom:9px;}
+  .curso-card .cd{display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft);}
+  .curso-card .cd b{color:var(--ink); font-family:var(--serif); font-size:15px;}
+
   /* ---------- Roadmap ---------- */
   .roadmap-col{margin-bottom:30px;}
   .roadmap-heading{
@@ -449,6 +459,7 @@
   <nav class="tabbar" role="tablist">
     <button class="tab active" data-tab="proceso" style="--dotcolor:var(--teal)" role="tab"><span class="dot"></span>proceso.flow</button>
     <button class="tab" data-tab="catalogo" style="--dotcolor:var(--indigo)" role="tab"><span class="dot"></span>catalogo.metodologias</button>
+    <button class="tab" data-tab="formacion" style="--dotcolor:#6B7A3A" role="tab"><span class="dot"></span>formacion.cursos</button>
     <button class="tab" data-tab="roadmap" style="--dotcolor:var(--amber)" role="tab"><span class="dot"></span>futuro.roadmap</button>
   </nav>
 </header>
@@ -487,6 +498,29 @@
 
     <div class="catalog-count" id="catalog-count"></div>
     <div class="card-grid" id="catalog-grid"></div>
+  </section>
+
+
+  <!-- ============ TAB: FORMACIÓN ============ -->
+  <section class="panel" id="panel-formacion">
+    <h2 class="panel-title">Formación en R</h2>
+    <p class="panel-desc">Cursos y capacitaciones que el equipo dicta a investigadores, docentes y estudiantes de postgrado de la universidad. Los participantes trabajan con sus propios datos y terminan entregando un proyecto reproducible.</p>
+
+    <div class="curso-kpis" id="curso-kpis"></div>
+
+    <div id="curso-lista"></div>
+
+    <h3 class="metric-heading" style="margin-top:26px">Quiénes participan</h3>
+    <div class="metrics-grid">
+      <div class="metric-block">
+        <h3 class="metric-heading">Por rol académico</h3>
+        <div id="curso-rol"></div>
+      </div>
+      <div class="metric-block">
+        <h3 class="metric-heading">Por facultad o unidad</h3>
+        <div id="curso-fac"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ============ TAB 3: ROADMAP ============ -->
@@ -756,6 +790,75 @@ document.getElementById('search-input').addEventListener('input', (e)=>{
 });
 
 setupFilters();
+
+
+/* ---------- Formación ---------- */
+const CURSOS = [
+  {nombre:'Introducción a R para análisis estadístico', tipo:'Curso', nivel:'intermedio',
+   fechas:'15 – 29 abril 2025', sesiones:6, inscritos:52, proyectos:10,
+   desc:'Manipulación de datos, modelamiento, reducción de dimensionalidad e introducción a machine learning.'},
+  {nombre:'Fundamentos básicos para el análisis de datos con R', tipo:'Curso', nivel:'inicial',
+   fechas:'30 sep – 14 octubre 2025', sesiones:5, inscritos:41, proyectos:3,
+   desc:'Entorno de R y RStudio, estructuras de datos, programación, visualización con ggplot y reportes reproducibles.'},
+  {nombre:'Data Science y uso de IA — Doctorado en Odontología', tipo:'Capacitación', nivel:'aplicado',
+   fechas:'12 junio 2026', sesiones:1, inscritos:3, proyectos:0,
+   desc:'Sesión aplicada dentro del programa de doctorado: flujo de análisis reproducible y uso de IA como apoyo metodológico.'}
+];
+const CURSO_ROL = [
+  {label:'Estudiante de Magíster', n:30},
+  {label:'Estudiante de Doctorado', n:23},
+  {label:'Docente o Académico/a', n:19},
+  {label:'Investigador/a', n:18},
+  {label:'Otro o sin dato', n:3}
+];
+const CURSO_FAC = [
+  {label:'Medicina', n:27},
+  {label:'CIIB', n:11},
+  {label:'Cs. Económicas y Empresariales', n:9},
+  {label:'Comunicación', n:9},
+  {label:'Ingeniería y Cs. Aplicadas', n:9},
+  {label:'Ciencias Sociales', n:7},
+  {label:'Enfermería y Obstetricia', n:6},
+  {label:'Odontología', n:4},
+  {label:'Otras unidades', n:11}
+];
+
+function renderBarrasCurso(id, data, color){
+  const cont = document.getElementById(id);
+  const max = Math.max(...data.map(d=>d.n));
+  cont.innerHTML = data.map(d=>`
+    <div class="bar-row">
+      <div class="bar-label"><span>${d.label}</span><span class="n">${d.n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(d.n/max*100).toFixed(0)}%; background:${color}"></div></div>
+    </div>`).join('');
+}
+
+(function(){
+  const insc = CURSOS.reduce((a,c)=> a + (c.inscritos||0), 0);
+  const ses  = CURSOS.reduce((a,c)=> a + c.sesiones, 0);
+  const proy = CURSOS.reduce((a,c)=> a + c.proyectos, 0);
+  document.getElementById('curso-kpis').innerHTML = `
+    <div class="curso-kpi"><span class="n">${CURSOS.length}</span><span class="lbl">Actividades dictadas</span></div>
+    <div class="curso-kpi"><span class="n">${ses}</span><span class="lbl">Sesiones</span></div>
+    <div class="curso-kpi"><span class="n">${insc}</span><span class="lbl">Inscripciones</span></div>
+    <div class="curso-kpi"><span class="n">${proy}</span><span class="lbl">Proyectos finales</span></div>
+    <div class="curso-kpi"><span class="n">14</span><span class="lbl">Unidades representadas</span></div>`;
+
+  document.getElementById('curso-lista').innerHTML = CURSOS.map(c=>`
+    <div class="curso-card">
+      <p class="cn">${c.nombre}</p>
+      <p class="cm">${c.tipo} · nivel ${c.nivel} · ${c.fechas}</p>
+      <p class="method-desc" style="margin-bottom:10px">${c.desc}</p>
+      <div class="cd">
+        <span><b>${c.sesiones}</b> sesiones</span>
+        <span><b>${c.inscritos !== null ? c.inscritos : '—'}</b> inscritos</span>
+        <span><b>${c.proyectos}</b> proyectos finales</span>
+      </div>
+    </div>`).join('');
+
+  renderBarrasCurso('curso-rol', CURSO_ROL, 'var(--indigo)');
+  renderBarrasCurso('curso-fac', CURSO_FAC, 'var(--amber)');
+})();
 
 // --- Roadmap ---
 const roadmapContainer = document.getElementById('roadmap-container');
