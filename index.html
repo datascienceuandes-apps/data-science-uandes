@@ -459,6 +459,7 @@
   <nav class="tabbar" role="tablist">
     <button class="tab active" data-tab="proceso" style="--dotcolor:var(--teal)" role="tab"><span class="dot"></span>proceso.flow</button>
     <button class="tab" data-tab="catalogo" style="--dotcolor:var(--indigo)" role="tab"><span class="dot"></span>catalogo.metodologias</button>
+    <button class="tab" data-tab="agente" style="--dotcolor:#3D4E8C" role="tab"><span class="dot"></span>agente.tareas</button>
     <button class="tab" data-tab="formacion" style="--dotcolor:#6B7A3A" role="tab"><span class="dot"></span>formacion.cursos</button>
     <button class="tab" data-tab="roadmap" style="--dotcolor:var(--amber)" role="tab"><span class="dot"></span>futuro.roadmap</button>
   </nav>
@@ -500,6 +501,18 @@
     <div class="card-grid" id="catalog-grid"></div>
   </section>
 
+
+
+  <!-- ============ TAB: AGENTE ============ -->
+  <section class="panel" id="panel-agente">
+    <h2 class="panel-title">Agente de la plataforma de portafolio</h2>
+    <p class="panel-desc">El equipo desarrolla y opera una plataforma de visualización del portafolio de innovación, y sobre ella un agente automatizado que trabaja de forma continua para la Dirección. Estas son las tareas que ejecuta.</p>
+
+    <div class="card-grid" id="agente-tareas"></div>
+
+    <h3 class="metric-heading" style="margin-top:28px">Cómo se solicita</h3>
+    <p class="method-desc" style="max-width:76ch">El agente atiende por correo. Cualquier persona de la Dirección puede escribirle para pedir información del portafolio, ajustar los criterios de una búsqueda o solicitar un reporte específico. Las solicitudes que implican cambiar la lógica del agente pasan al equipo y se tratan como desarrollo, no como consulta.</p>
+  </section>
 
   <!-- ============ TAB: FORMACIÓN ============ -->
   <section class="panel" id="panel-formacion">
@@ -547,7 +560,7 @@ const PROCESO = [
     color: 'var(--indigo)',
     titulo: 'Recepción de la solicitud',
     resumen: 'El investigador completa el formulario electrónico y la fila aparece automáticamente en el Excel vinculado.',
-    detalle: '<strong>Entrada:</strong> formulario Microsoft Forms. <strong>Salida:</strong> fila nueva en la hoja "Nuevo" con Id correlativo, datos del proyecto, financiamiento, tipo de apoyo y disponibilidad de datos.<br><br>Aquí solo se verifica que la fila esté completa. Si la solicitud llegó por correo o en una reunión sin pasar por el formulario, se le pide al investigador que lo complete: sin fila en el Excel no hay trazabilidad ni reloj. <strong>SLA:</strong> no aplica — es el punto de partida del cronómetro.',
+    detalle: '<strong>Entrada:</strong> formulario Microsoft Forms. <strong>Salida:</strong> fila nueva en la hoja "Nuevo" con Id correlativo, datos del proyecto, financiamiento, tipo de apoyo y disponibilidad de datos.<br><br>Aquí solo se verifica que la fila esté completa. Si la solicitud llegó por correo o en una reunión sin pasar por el formulario, se le pide al investigador que lo complete: sin fila en el Excel no hay trazabilidad ni reloj. <strong>SLA:</strong> no aplica — es el punto de partida del cronómetro.<br><br><strong>Regla de la barrera:</strong> cuando el requerimiento llega antes que el formulario, el análisis puede empezar, pero la entrega se retiene hasta que el formulario esté ingresado. La barrera va en la entrega y no en el inicio: poner el freno al comienzo daña la relación con el investigador por un trámite, mientras que ponerlo en la entrega protege lo que de verdad importa —que el alcance esté definido y el trabajo quede registrado— sin frenar el avance.',
     estados: ['Recepción']
   },
   {
@@ -792,6 +805,31 @@ document.getElementById('search-input').addEventListener('input', (e)=>{
 setupFilters();
 
 
+
+/* ---------- Agente ---------- */
+const AGENTE_TAREAS = [
+  {nombre:'Vigilancia de convocatorias de fondos', tipo:'Automática · diaria',
+   desc:'Revisa las páginas de fondos definidas, detecta convocatorias con plazo vigente y compara cada una contra el portafolio de innovación para proponer coincidencias con proyectos y capacidades de la universidad.',
+   salida:'Correo diario a la Dirección con las convocatorias nuevas y sus coincidencias.'},
+  {nombre:'Consulta del portafolio y de perfiles académicos', tipo:'Automática · a demanda',
+   desc:'Responde preguntas sobre proyectos, tecnologías y perfiles de investigadores registrados en el portafolio, sin que la persona tenga que navegar la plataforma.',
+   salida:'Respuesta por correo con la información solicitada.'},
+  {nombre:'Reportes operativos por fondo', tipo:'Solicitud individual',
+   desc:'A pedido de un usuario, elabora un reporte enfocado en un fondo concreto: estado de la postulación, coincidencias con perfiles de proyecto y documentos asociados.',
+   salida:'Informe operativo y ajustes a los criterios de coincidencia.'},
+  {nombre:'Ajuste de criterios de coincidencia', tipo:'Solicitud individual',
+   desc:'Incorpora o excluye perfiles y afina las reglas con que el agente decide qué proyecto calza con qué convocatoria. Requiere intervención del equipo sobre la lógica del agente.',
+   salida:'Nueva versión de las reglas de matching.'}
+];
+
+document.getElementById('agente-tareas').innerHTML = AGENTE_TAREAS.map(t=>`
+  <div class="method-card">
+    <div class="method-name">${t.nombre}</div>
+    <div class="method-tags"><span class="tag tipo">${t.tipo}</span></div>
+    <p class="method-desc">${t.desc}</p>
+    <p class="method-example">Entrega: ${t.salida}</p>
+  </div>`).join('');
+
 /* ---------- Formación ---------- */
 const CURSOS = [
   {nombre:'Introducción a R para análisis estadístico', tipo:'Curso', nivel:'intermedio',
@@ -802,7 +840,10 @@ const CURSOS = [
    desc:'Entorno de R y RStudio, estructuras de datos, programación, visualización con ggplot y reportes reproducibles.'},
   {nombre:'Data Science y uso de IA — Doctorado en Odontología', tipo:'Capacitación', nivel:'aplicado',
    fechas:'12 junio 2026', sesiones:1, inscritos:3, proyectos:0,
-   desc:'Sesión aplicada dentro del programa de doctorado: flujo de análisis reproducible y uso de IA como apoyo metodológico.'}
+   desc:'Sesión aplicada dentro del programa de doctorado: flujo de análisis reproducible y uso de IA como apoyo metodológico.'},
+  {nombre:'Análisis de datos en R con apoyo de IA', tipo:'Curso', nivel:'aplicado',
+   fechas:'octubre 2026', sesiones:null, inscritos:null, proyectos:null, programado:true,
+   desc:'Nueva versión del curso, centrada en usar inteligencia artificial como apoyo al análisis: escribir y depurar código, interpretar resultados y documentar el proceso. Diseñado para ser autoexplicativo, de modo que cada participante pueda avanzar a su ritmo y retomar el material después del curso.'}
 ];
 const CURSO_ROL = [
   {label:'Estudiante de Magíster', n:30},
@@ -834,26 +875,27 @@ function renderBarrasCurso(id, data, color){
 }
 
 (function(){
-  const insc = CURSOS.reduce((a,c)=> a + (c.inscritos||0), 0);
-  const ses  = CURSOS.reduce((a,c)=> a + c.sesiones, 0);
-  const proy = CURSOS.reduce((a,c)=> a + c.proyectos, 0);
+  const DICT = CURSOS.filter(c => !c.programado);
+  const insc = DICT.reduce((a,c)=> a + (c.inscritos||0), 0);
+  const ses  = DICT.reduce((a,c)=> a + c.sesiones, 0);
+  const proy = DICT.reduce((a,c)=> a + c.proyectos, 0);
   document.getElementById('curso-kpis').innerHTML = `
-    <div class="curso-kpi"><span class="n">${CURSOS.length}</span><span class="lbl">Actividades dictadas</span></div>
+    <div class="curso-kpi"><span class="n">${DICT.length}</span><span class="lbl">Actividades dictadas</span></div>
     <div class="curso-kpi"><span class="n">${ses}</span><span class="lbl">Sesiones</span></div>
     <div class="curso-kpi"><span class="n">${insc}</span><span class="lbl">Inscripciones</span></div>
     <div class="curso-kpi"><span class="n">${proy}</span><span class="lbl">Proyectos finales</span></div>
     <div class="curso-kpi"><span class="n">14</span><span class="lbl">Unidades representadas</span></div>`;
 
   document.getElementById('curso-lista').innerHTML = CURSOS.map(c=>`
-    <div class="curso-card">
-      <p class="cn">${c.nombre}</p>
+    <div class="curso-card"${c.programado ? ' style="border-left-color:var(--amber)"' : ''}>
+      <p class="cn">${c.nombre}${c.programado ? ' <span class="tag tipo" style="vertical-align:middle">Próximamente</span>' : ''}</p>
       <p class="cm">${c.tipo} · nivel ${c.nivel} · ${c.fechas}</p>
       <p class="method-desc" style="margin-bottom:10px">${c.desc}</p>
-      <div class="cd">
+      ${c.programado ? '' : `<div class="cd">
         <span><b>${c.sesiones}</b> sesiones</span>
         <span><b>${c.inscritos !== null ? c.inscritos : '—'}</b> inscritos</span>
         <span><b>${c.proyectos}</b> proyectos finales</span>
-      </div>
+      </div>`}
     </div>`).join('');
 
   renderBarrasCurso('curso-rol', CURSO_ROL, 'var(--indigo)');

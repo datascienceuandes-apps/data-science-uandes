@@ -85,6 +85,12 @@
   .lede{background:var(--teal-soft); border-left:4px solid var(--teal); border-radius:var(--radius); padding:15px 19px; margin:6px 0 16px; font-size:13.5px;}
   .lede.amb{background:var(--amber-soft); border-left-color:var(--amber);}
 
+  .otras{display:flex; flex-direction:column; gap:10px;}
+  .ot-fila{display:flex; align-items:baseline; gap:11px; padding-bottom:9px; border-bottom:1px solid #F1EFE9;}
+  .ot-fila:last-child{border-bottom:none; padding-bottom:0;}
+  .ot-n{font-family:var(--serif); font-size:24px; font-weight:600; color:var(--teal); min-width:34px;}
+  .ot-t{font-size:12.5px; color:var(--ink-soft); line-height:1.45;}
+  .ot-t b{color:var(--ink);}
   .dotacion{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:17px 19px; margin-bottom:16px;}
   .dot-title{font-family:var(--serif); font-size:15.5px; font-weight:600; margin-bottom:14px;}
   .dot-row{display:flex; align-items:center; gap:12px; margin-bottom:8px;}
@@ -239,6 +245,22 @@
       <h3>Participantes por facultad o unidad</h3>
       <p class="note">Catorce unidades representadas, varias que aún no han solicitado apoyo formal.</p>
       <div class="chart-wrap tall"><canvas id="c-facCurso"></canvas></div>
+    </div>
+  </div>
+
+  <h2>Otras líneas de trabajo</h2>
+  <p class="h2sub">Además de los requerimientos de investigadores, el equipo sostiene una plataforma con un agente automatizado y participa en publicaciones propias. No responden a los filtros del panel.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Agente de la plataforma de portafolio</h3>
+      <p class="note">Servicio automatizado para la Dirección de Innovación, en marcha desde junio 2026.</p>
+      <div class="otras" id="otras-agente"></div>
+    </div>
+    <div class="card">
+      <h3>Publicaciones propias</h3>
+      <p class="note">Papers con participación del equipo en la autoría.</p>
+      <div class="otras" id="otras-papers"></div>
     </div>
   </div>
 
@@ -600,7 +622,9 @@ const CURSOS = [
   {nombre:'Fundamentos básicos para el análisis de datos con R', nivel:'Inicial', tipo:'Curso',
    inicio:'30 sep 2025', fin:'14 oct 2025', sesiones:5, inscritos:41, asistieron:20, proyectos:3},
   {nombre:'Data Science y uso de IA — Doctorado en Odontología', nivel:'Aplicado', tipo:'Capacitación',
-   inicio:'12 jun 2026', fin:'12 jun 2026', sesiones:1, inscritos:3, asistieron:3, proyectos:0}
+   inicio:'12 jun 2026', fin:'12 jun 2026', sesiones:1, inscritos:3, asistieron:3, proyectos:0},
+  {nombre:'Análisis de datos en R con apoyo de IA', nivel:'Aplicado', tipo:'Curso',
+   inicio:'octubre 2026', fin:'', sesiones:0, inscritos:null, asistieron:null, proyectos:0, programado:true}
 ];
 
 // Composición de los dos cursos con registro de inscripción (93 inscripciones, 89 personas únicas).
@@ -626,12 +650,13 @@ const CURSO_FAC = [
 const CURSO_CONVERSION = {personas:8, solicitudes:18};
 
 (function(){
-  const totalInscritos = CURSOS.reduce((a,c)=> a + (c.inscritos || 0), 0);
-  const totalProy = CURSOS.reduce((a,c)=> a + c.proyectos, 0);
-  const totalSes = CURSOS.reduce((a,c)=> a + c.sesiones, 0);
+  const DICTADOS = CURSOS.filter(c => !c.programado);
+  const totalInscritos = DICTADOS.reduce((a,c)=> a + (c.inscritos || 0), 0);
+  const totalProy = DICTADOS.reduce((a,c)=> a + c.proyectos, 0);
+  const totalSes = DICTADOS.reduce((a,c)=> a + c.sesiones, 0);
 
   document.getElementById('kpis-curso').innerHTML = `
-    <div class="kpi t"><span class="n">${CURSOS.length}</span><span class="lbl">Actividades</span><span class="foot">2 cursos y 1 capacitación</span></div>
+    <div class="kpi t"><span class="n">${DICTADOS.length}</span><span class="lbl">Actividades dictadas</span><span class="foot">2 cursos y 1 capacitación · 1 más programado</span></div>
     <div class="kpi t"><span class="n">${totalSes}</span><span class="lbl">Sesiones</span><span class="foot">${CURSOS.map(c=>c.sesiones).join(' + ')}</span></div>
     <div class="kpi i"><span class="n">${totalInscritos}</span><span class="lbl">Participantes</span><span class="foot">92 personas distintas</span></div>
     <div class="kpi a"><span class="n">${totalProy}</span><span class="lbl">Proyectos finales</span><span class="foot">con datos propios del participante</span></div>
@@ -643,12 +668,12 @@ const CURSO_CONVERSION = {personas:8, solicitudes:18};
     `De los <strong>${insc} participantes</strong> registrados, ${asis} asistieron al menos una sesión y ${totalProy} entregaron un proyecto final con datos propios. Posteriormente <strong>${CURSO_CONVERSION.personas} participantes ingresaron ${CURSO_CONVERSION.solicitudes} requerimientos formales</strong> por el formulario: algo más de un cuarto de la demanda histórica del equipo proviene de personas que pasaron por una actividad de formación.`;
 
   document.getElementById('cursos-body').innerHTML = CURSOS.map(c=>`
-    <tr>
-      <td>${c.nombre}<br><span class="cod">${c.tipo.toLowerCase()} · nivel ${c.nivel.toLowerCase()}</span></td>
-      <td class="cod">${c.inicio} — ${c.fin}</td>
-      <td class="cod">${c.sesiones}</td>
-      <td class="cod">${c.inscritos !== null ? c.inscritos : '<span class="nd">sin registro</span>'}</td>
-      <td class="cod">${c.proyectos}</td>
+    <tr${c.programado ? ' style="opacity:.72"' : ''}>
+      <td>${c.nombre}${c.programado ? ' <span class="cat" style="background:var(--indigo-soft); color:var(--indigo)">programado</span>' : ''}<br><span class="cod">${c.tipo.toLowerCase()} · nivel ${c.nivel.toLowerCase()}</span></td>
+      <td class="cod">${c.fin ? c.inicio + ' — ' + c.fin : c.inicio}</td>
+      <td class="cod">${c.sesiones || '<span class="nd">—</span>'}</td>
+      <td class="cod">${c.inscritos !== null ? c.inscritos : '<span class="nd">—</span>'}</td>
+      <td class="cod">${c.programado ? '<span class="nd">—</span>' : c.proyectos}</td>
     </tr>`).join('');
 
   new Chart(document.getElementById('c-rol'), {
@@ -666,6 +691,21 @@ const CURSO_CONVERSION = {personas:8, solicitudes:18};
     options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{legend:{display:false}}, scales:{y:sinGrid, x:Object.assign({beginAtZero:true},conGrid)}}
   });
+})();
+
+/* Otras líneas de trabajo — resumen agregado, sin nombres. */
+(function(){
+  document.getElementById('otras-agente').innerHTML = `
+    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>tareas automáticas en marcha</b> — vigilancia diaria de convocatorias de fondos con matching contra el portafolio, y consulta de perfiles y proyectos a demanda.</span></div>
+    <div class="ot-fila"><span class="ot-n">48</span><span class="ot-t"><b>días operando</b> desde el 25 de junio de 2026, con notificación casi diaria a la Dirección.</span></div>
+    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>solicitudes individuales</b> recibidas de usuarios de la Dirección: una resuelta y una en curso. Son las que consumen tiempo del equipo; el resto corre solo.</span></div>
+    <div class="ot-fila"><span class="ot-n">8</span><span class="ot-t"><b>de 18 componentes</b> de la plataforma de ingreso de datos ya en producción. Al completarse reemplaza a la planilla que hoy alimenta el portafolio.</span></div>
+    <div class="ot-fila"><span class="ot-n">11</span><span class="ot-t"><b>reportes de usuarios</b> consolidados desde marzo de 2026: 6 errores y 5 propuestas de mejora, llegados por canales informales y reunidos en un registro único.</span></div>`;
+
+  document.getElementById('otras-papers').innerHTML = `
+    <div class="ot-fila"><span class="ot-n">3</span><span class="ot-t"><b>papers con participación del equipo</b> en la autoría, no solo en el apoyo metodológico.</span></div>
+    <div class="ot-fila"><span class="ot-n">1</span><span class="ot-t"><b>enviado a revista</b>, a la espera de respuesta editorial desde julio 2026.</span></div>
+    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>en desarrollo</b>, uno de ellos derivado de un requerimiento en curso, donde el equipo cumple doble rol de analista y coautor.</span></div>`;
 })();
 
 render();
