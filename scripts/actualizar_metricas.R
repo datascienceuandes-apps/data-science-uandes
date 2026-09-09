@@ -2,25 +2,26 @@
 # =============================================================================
 # actualizar_metricas.R
 #
-# Recalcula RESUMEN_METRICAS (total, por estado, por tipo de apoyo, por
-# facultad/unidad, por año) a partir de un export de la hoja consolidada del
-# formulario ("PowerBI" en el Excel de SharePoint) y reescribe ese bloque
-# dentro de panel/index.html, entre los marcadores:
-#   // __RESUMEN_METRICAS_START__  ...  // __RESUMEN_METRICAS_END__
+# El panel publico (panel/index.html) calcula TODOS sus KPIs en el navegador
+# a partir de un unico array `DATA` (una fila anonimizada por solicitud).
+# Este script NO reescribe ese calculo: solo sincroniza el campo "estado" (e)
+# de las filas que YA EXISTEN en DATA contra el Excel, y reporta -sin
+# publicarlas- las solicitudes nuevas que todavia no tienen fila en DATA,
+# para que alguien les escriba a mano la descripcion (met) antes de agregarlas.
 #
-# No toca ROADMAP ni ninguna otra parte del archivo.
+# Por que asi: los campos 'met' (metodologia, una linea editorial), 'mot'
+# (motivo si no prospero) y 'cat' se escriben a mano -no son un calculo
+# mecanico del Excel- y el codigo de anonimizacion ('inv'/'k') debe ser
+# estable entre corridas. Este script nunca los toca ni los inventa.
 #
 # Uso:
 #   Rscript actualizar_metricas.R ruta/al/export.csv panel/index.html
 #
-# El export.csv debe ser la hoja "PowerBI" exportada tal cual (una fila por
-# solicitud, con las cabeceras originales del formulario). Si el formulario
-# cambia de nombre alguna columna, ajusta las constantes COL_* más abajo.
+# El export.csv debe ser la hoja "PowerBI" (consolidada) exportada tal cual.
 # =============================================================================
 
 suppressWarnings(suppressMessages({
   library(dplyr)
-  library(tidyr)
   library(readr)
   library(stringr)
   library(jsonlite)
@@ -34,157 +35,114 @@ ruta_csv   <- args[[1]]
 ruta_panel <- args[[2]]
 
 # ---------------------------------------------------------------------------
-# 1. Nombres de columna esperados en el export (ajustar aquí si cambian)
+# 1. Columnas esperadas en el export (ajustar aqui si el formulario cambia)
 # ---------------------------------------------------------------------------
+COL_ID     <- "Id"       # debe calzar con el "id" usado en DATA (ver mas abajo)
 COL_ESTADO <- "Estado"
-COL_TIPO_APOYO <- "¿Qué tipo de apoyo necesita sobre sus datos?"   # multi-selección separada por ";"
-COL_FACULTAD <- "Facultad o Unidad (si no encuentra su centro, por favor especifique en la opción Otras)"
-COL_FECHA_INGRESO <- "Start time"   # fecha de ingreso del formulario -> año
-
-# Etiqueta larga -> etiqueta corta para mostrar en el panel público
-MAPA_FACULTAD <- c(
-  "Facultad de Ciencias Sociales" = "Facultad de Ciencias Sociales",
-  "Facultad de Odontología" = "Facultad de Odontología",
-  "Facultad de Medicina" = "Facultad de Medicina",
-  "Facultad de Comunicación" = "Facultad de Comunicación",
-  "Facultad de Enfermería y Obstetricia" = "Facultad de Enfermería y Obstetricia",
-  "Clínica UAndes" = "Clínica UAndes",
-  "CIIB" = "CIIB",
-  "Dirección de Innovación" = "Dirección de Innovación",
-  "CIIL Uandes" = "CIIL Uandes",
-  "Dirección de Investigación y Doctorado" = "Dirección de Investigación y Doctorado"
-)
-OTRAS_FACULTADES_LABEL <- "Otras unidades (Ing., Economía, CEG)"
 
 # ---------------------------------------------------------------------------
-# 2. Cargar datos
+# 2. Cargar el export
 # ---------------------------------------------------------------------------
 if (!file.exists(ruta_csv)) stop("No se encontró el export: ", ruta_csv)
-datos <- read_csv(ruta_csv, show_col_types = FALSE)
+export <- read_csv(ruta_csv, show_col_types = FALSE)
 
-faltantes <- setdiff(c(COL_ESTADO, COL_TIPO_APOYO, COL_FACULTAD, COL_FECHA_INGRESO), names(datos))
+faltantes <- setdiff(c(COL_ID, COL_ESTADO), names(export))
 if (length(faltantes) > 0) {
   stop(
     "El export no tiene las columnas esperadas: ", paste(faltantes, collapse = ", "),
-    "\nRevisa los nombres COL_* al inicio de este script contra las cabeceras reales:\n",
-    paste(names(datos), collapse = " | ")
+    "\nAjusta COL_ID / COL_ESTADO al inicio del script contra estas cabeceras reales:\n",
+    paste(names(export), collapse = " | ")
   )
 }
 
-# Quitar filas vacías/plantilla
-datos <- datos %>% filter(!is.na(.data[[COL_ESTADO]]), .data[[COL_ESTADO]] != "")
-
-total <- nrow(datos)
-if (total < 1) stop("El export no tiene filas válidas después de filtrar vacías; no se publica nada.")
-
-# ---------------------------------------------------------------------------
-# 3. Por estado
-# ---------------------------------------------------------------------------
-por_estado <- datos %>%
-  count(label = .data[[COL_ESTADO]], name = "n") %>%
-  arrange(desc(n))
+export <- export %>%
+  transmute(
+    id_raw = as.character(.data[[COL_ID]]),
+    estado = .data[[COL_ESTADO]]
+  ) %>%
+  filter(!is.na(id_raw), id_raw != "", !is.na(estado), estado != "")
 
 # ---------------------------------------------------------------------------
-# 4. Por tipo de apoyo (columna multi-selección separada por ";")
-# ---------------------------------------------------------------------------
-por_tipo <- datos %>%
-  select(tipo = all_of(COL_TIPO_APOYO)) %>%
-  filter(!is.na(tipo), tipo != "") %>%
-  separate_rows(tipo, sep = "\\s*;\\s*") %>%
-  count(label = tipo, name = "n") %>%
-  arrange(desc(n))
-
-# ---------------------------------------------------------------------------
-# 5. Por facultad/unidad (agrupando las minoritarias en "Otras unidades")
-# ---------------------------------------------------------------------------
-fac_cruda <- datos %>%
-  count(label = .data[[COL_FACULTAD]], name = "n")
-
-fac_conocidas <- fac_cruda %>% filter(label %in% names(MAPA_FACULTAD))
-fac_otras_n <- fac_cruda %>% filter(!label %in% names(MAPA_FACULTAD)) %>% pull(n) %>% sum()
-
-por_facultad <- fac_conocidas %>%
-  arrange(desc(n))
-if (fac_otras_n > 0) {
-  por_facultad <- bind_rows(por_facultad, tibble(label = OTRAS_FACULTADES_LABEL, n = fac_otras_n))
-}
-
-# ---------------------------------------------------------------------------
-# 6. Por año de ingreso
-# ---------------------------------------------------------------------------
-anio_actual <- as.integer(format(Sys.Date(), "%Y"))
-por_anio <- datos %>%
-  mutate(anio = suppressWarnings(as.integer(format(
-    as.Date(.data[[COL_FECHA_INGRESO]], tryFormats = c("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y")),
-    "%Y"
-  )))) %>%
-  filter(!is.na(anio)) %>%
-  count(anio, name = "n") %>%
-  arrange(anio) %>%
-  mutate(label = ifelse(anio == anio_actual, paste0(anio, " (a la fecha)"), as.character(anio)))
-
-# ---------------------------------------------------------------------------
-# 7. Armar el bloque JS
-# ---------------------------------------------------------------------------
-a_lista_js <- function(df) {
-  filas <- sprintf('    {label:%s, n:%d}', jsonlite::toJSON(df$label), df$n)
-  paste(filas, collapse = ",\n")
-}
-
-bloque <- sprintf(
-'// __RESUMEN_METRICAS_START__
-const RESUMEN_METRICAS = {
-  total: %d,
-  fuente: \'Hoja consolidada del formulario, histórico + año en curso.\',
-  actualizado: \'%s\',
-  porEstado: [
-%s
-  ],
-  porTipoApoyo: [
-%s
-  ],
-  porFacultad: [
-%s
-  ],
-  porAnio: [
-%s
-  ]
-};
-// __RESUMEN_METRICAS_END__',
-  total,
-  format(Sys.Date(), "%Y-%m-%d"),
-  a_lista_js(por_estado),
-  a_lista_js(por_tipo),
-  a_lista_js(por_facultad),
-  a_lista_js(por_anio %>% select(label, n))
-)
-
-# ---------------------------------------------------------------------------
-# 8. Comparar contra lo ya publicado (ignorando la fecha) y solo escribir si
-#    los números realmente cambiaron. Evita commits vacíos cada semana.
+# 3. Extraer el array DATA actual de panel/index.html
 # ---------------------------------------------------------------------------
 if (!file.exists(ruta_panel)) stop("No se encontró: ", ruta_panel)
 html <- read_file(ruta_panel)
 
-patron <- "// __RESUMEN_METRICAS_START__[\\s\\S]*?// __RESUMEN_METRICAS_END__"
-if (!str_detect(html, patron)) {
-  stop("No se encontraron los marcadores __RESUMEN_METRICAS_START__/END__ en ", ruta_panel,
+patron_data <- "const DATA = (\\[.*?\\]);"
+m <- str_match(html, patron_data)
+if (is.na(m[1, 2])) {
+  stop("No se encontró 'const DATA = [...]' en ", ruta_panel,
        ". No se modifica el archivo para evitar publicar algo inconsistente.")
 }
+data_json <- m[1, 2]
+data_actual <- fromJSON(data_json, simplifyDataFrame = FALSE)
 
-quitar_fecha <- function(x) str_replace(x, "actualizado: '[^']*',", "actualizado: '',")
+ids_data <- vapply(data_actual, function(r) as.character(r$id), character(1))
 
-bloque_anterior <- str_extract(html, patron)
-sin_cambios <- quitar_fecha(bloque_anterior) == quitar_fecha(bloque)
+# ---------------------------------------------------------------------------
+# 4. Emparejar por Id: separar en (a) filas existentes con estado distinto,
+#    (b) solicitudes nuevas que no tienen fila en DATA todavia.
+# ---------------------------------------------------------------------------
+# El id en DATA es, para historicas, "<Id>_1"; para las mas recientes, "<Id>"
+# a secas. Probamos ambas formas contra lo que trae el export.
+candidatos_id <- function(id_raw) unique(c(id_raw, paste0(id_raw, "_1")))
 
-if (sin_cambios) {
-  cat(sprintf("SIN_CAMBIOS: %d solicitudes procesadas, los números no variaron respecto a la última publicación. No se modifica %s.\n",
-              total, ruta_panel))
-} else {
-  html_nuevo <- str_replace(html, patron, bloque)
+cambios <- list()
+nuevas  <- list()
+
+for (i in seq_len(nrow(export))) {
+  fila <- export[i, ]
+  candidatos <- candidatos_id(fila$id_raw)
+  idx <- which(ids_data %in% candidatos)
+
+  if (length(idx) == 0) {
+    nuevas[[length(nuevas) + 1]] <- fila
+  } else if (length(idx) == 1) {
+    fila_data <- data_actual[[idx]]
+    if (!identical(fila_data$e, fila$estado)) {
+      cambios[[length(cambios) + 1]] <- list(
+        id = fila_data$id, estado_anterior = fila_data$e, estado_nuevo = fila$estado
+      )
+      data_actual[[idx]]$e <- fila$estado
+    }
+  } else {
+    warning("Id ambiguo, se omite: ", fila$id_raw)
+  }
+}
+
+# ---------------------------------------------------------------------------
+# 5. Si no hay cambios de estado ni solicitudes nuevas, no tocar el archivo.
+# ---------------------------------------------------------------------------
+if (length(cambios) == 0 && length(nuevas) == 0) {
+  cat("SIN_CAMBIOS: no hay estados nuevos que sincronizar ni solicitudes nuevas.\n")
+  quit(save = "no", status = 0)
+}
+
+# ---------------------------------------------------------------------------
+# 6. Si hubo cambios de estado, reescribir el array DATA (solo el campo 'e'
+#    de las filas afectadas cambia; el resto queda byte a byte igual).
+# ---------------------------------------------------------------------------
+if (length(cambios) > 0) {
+  data_json_nuevo <- toJSON(data_actual, auto_unbox = TRUE, null = "null")
+  html_nuevo <- str_replace(html, patron_data, paste0("const DATA = ", data_json_nuevo, ";"))
   write_file(html_nuevo, ruta_panel)
-  cat(sprintf(
-    "OK: %d solicitudes procesadas. %s actualizado (%s).\n",
-    total, ruta_panel, format(Sys.Date(), "%Y-%m-%d")
-  ))
+
+  cat(sprintf("OK: %d solicitud(es) con estado actualizado en %s:\n", length(cambios), ruta_panel))
+  for (c in cambios) {
+    cat(sprintf("  - id %s: %s -> %s\n", c$id, c$estado_anterior, c$estado_nuevo))
+  }
+} else {
+  cat("SIN_CAMBIOS_DE_ESTADO: no se modifica DATA (solo hay solicitudes nuevas pendientes, ver abajo).\n")
+}
+
+# ---------------------------------------------------------------------------
+# 7. Solicitudes nuevas: NUNCA se agregan solas a DATA. Se listan para que
+#    Pamela las agregue a mano (con su descripcion 'met' y su codigo de
+#    anonimizacion).
+# ---------------------------------------------------------------------------
+if (length(nuevas) > 0) {
+  cat(sprintf("\nPENDIENTES: %d solicitud(es) nueva(s) en el Excel sin fila en DATA todavía:\n", length(nuevas)))
+  for (n in nuevas) {
+    cat(sprintf("  - Id %s (estado: %s) — agregar a mano en panel/index.html con su descripción.\n", n$id_raw, n$estado))
+  }
 }
