@@ -35,10 +35,13 @@ with open(ruta_csv, encoding="utf-8") as f:
             f"El export no tiene las columnas esperadas: {COL_ID}, {COL_ESTADO}\n"
             f"Cabeceras reales: {reader.fieldnames}"
         )
+    # Se exige Id no vacío, pero NO se descartan filas con Estado vacío: una
+    # solicitud nueva que todavía no tiene estado asignado en el Excel debe
+    # reportarse igual como pendiente, nunca desaparecer silenciosamente.
     export_rows = [
         (row[COL_ID].strip(), row[COL_ESTADO].strip())
         for row in reader
-        if row[COL_ID].strip() and row[COL_ESTADO].strip()
+        if row[COL_ID].strip()
     ]
 
 with open(ruta_panel, encoding="utf-8") as f:
@@ -59,8 +62,10 @@ for id_raw, estado in export_rows:
     # sufijo "_1" segun de que hoja vino) -- coincidencia exacta, sin adivinar.
     idx = ids_data.get(id_raw)
     if idx is None:
-        nuevas.append((id_raw, estado))
-    elif data[idx]["e"] != estado:
+        nuevas.append((id_raw, estado or "(sin estado en el Excel)"))
+    elif estado and data[idx]["e"] != estado:
+        # Si el Excel no trae estado todavia, no se sobreescribe el que ya
+        # hay en DATA con un valor vacio.
         cambios.append((data[idx]["id"], data[idx]["e"], estado))
         data[idx]["e"] = estado
 

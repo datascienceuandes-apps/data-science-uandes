@@ -55,12 +55,15 @@ if (length(faltantes) > 0) {
   )
 }
 
+# Se exige Id no vacío, pero NO se descartan filas con Estado vacío: una
+# solicitud nueva que todavía no tiene estado asignado en el Excel debe
+# reportarse igual como pendiente, nunca desaparecer silenciosamente.
 export <- export %>%
   transmute(
     id_raw = as.character(.data[[COL_ID]]),
-    estado = .data[[COL_ESTADO]]
+    estado = ifelse(is.na(.data[[COL_ESTADO]]), "", .data[[COL_ESTADO]])
   ) %>%
-  filter(!is.na(id_raw), id_raw != "", !is.na(estado), estado != "")
+  filter(!is.na(id_raw), id_raw != "")
 
 # ---------------------------------------------------------------------------
 # 3. Extraer el array DATA actual de panel/index.html
@@ -97,8 +100,11 @@ for (i in seq_len(nrow(export))) {
   idx <- which(ids_data == fila$id_raw)
 
   if (length(idx) == 0) {
+    if (fila$estado == "") fila$estado <- "(sin estado en el Excel)"
     nuevas[[length(nuevas) + 1]] <- fila
-  } else {
+  } else if (fila$estado != "") {
+    # Si el Excel no trae estado todavia, no se sobreescribe el que ya
+    # hay en DATA con un valor vacio.
     fila_data <- data_actual[[idx[[1]]]]
     if (!identical(fila_data$e, fila$estado)) {
       cambios[[length(cambios) + 1]] <- list(
