@@ -160,7 +160,8 @@ const RESUMEN_METRICAS = {
 )
 
 # ---------------------------------------------------------------------------
-# 8. Reemplazar el bloque en panel/index.html
+# 8. Comparar contra lo ya publicado (ignorando la fecha) y solo escribir si
+#    los números realmente cambiaron. Evita commits vacíos cada semana.
 # ---------------------------------------------------------------------------
 if (!file.exists(ruta_panel)) stop("No se encontró: ", ruta_panel)
 html <- read_file(ruta_panel)
@@ -171,10 +172,19 @@ if (!str_detect(html, patron)) {
        ". No se modifica el archivo para evitar publicar algo inconsistente.")
 }
 
-html_nuevo <- str_replace(html, patron, bloque)
-write_file(html_nuevo, ruta_panel)
+quitar_fecha <- function(x) str_replace(x, "actualizado: '[^']*',", "actualizado: '',")
 
-cat(sprintf(
-  "OK: %d solicitudes procesadas. %s actualizado (%s).\n",
-  total, ruta_panel, format(Sys.Date(), "%Y-%m-%d")
-))
+bloque_anterior <- str_extract(html, patron)
+sin_cambios <- quitar_fecha(bloque_anterior) == quitar_fecha(bloque)
+
+if (sin_cambios) {
+  cat(sprintf("SIN_CAMBIOS: %d solicitudes procesadas, los números no variaron respecto a la última publicación. No se modifica %s.\n",
+              total, ruta_panel))
+} else {
+  html_nuevo <- str_replace(html, patron, bloque)
+  write_file(html_nuevo, ruta_panel)
+  cat(sprintf(
+    "OK: %d solicitudes procesadas. %s actualizado (%s).\n",
+    total, ruta_panel, format(Sys.Date(), "%Y-%m-%d")
+  ))
+}
