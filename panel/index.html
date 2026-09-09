@@ -6,8 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta name="googlebot" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>Panel ejecutivo — Equipo Ciencia de Datos · BiCI · UANDES</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Métricas — Equipo Ciencia de Datos · UANDES</title>
 <style>
   :root{
     --ink:#1C2321; --ink-soft:#6B7280; --line:#E3E1DA;
@@ -27,688 +26,137 @@
   .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin:0 0 8px;}
   h1{font-family:var(--serif); font-size:clamp(23px,3.2vw,32px); font-weight:600; margin:0 0 9px;}
   .sub{color:var(--ink-soft); max-width:74ch; margin:0; font-size:14px;}
-  main{padding:0 clamp(16px,4vw,48px) 50px; max-width:1320px;}
+  main{padding:26px clamp(16px,4vw,48px) 50px; max-width:1100px;}
 
-  .filterbar{position:sticky; top:0; z-index:20; background:var(--card); border-bottom:1px solid var(--line);
-    padding:11px clamp(16px,4vw,48px); display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-    box-shadow:0 1px 6px rgba(28,35,33,.05);}
-  .filterbar .fb-label{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
-  .fchip{font-family:var(--mono); font-size:11px; padding:4px 10px 4px 11px; border-radius:20px; background:var(--indigo-soft);
-    color:var(--indigo); border:1px solid #C9D1E8; cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
-  .fchip:hover{background:#D2D9EE;}
-  .fchip .x{font-weight:700; opacity:.65;}
-  .fchip .dim{opacity:.6;}
-  .clearall{font-family:var(--mono); font-size:11px; padding:4px 11px; border-radius:20px; background:var(--coral-soft);
-    color:var(--coral); border:1px solid #EFC9B8; cursor:pointer;}
-  .clearall:hover{background:#F2D3C5;}
-  .yearbar{display:inline-flex; border:1px solid var(--line); border-radius:20px; overflow:hidden; margin-right:6px;}
-  .ybtn{font-family:var(--mono); font-size:11px; padding:4px 11px; border:none; background:transparent; color:var(--ink-soft); cursor:pointer;}
-  .ybtn:hover{background:var(--paper-dim);}
-  .ybtn.on{background:var(--teal); color:#fff;}
-  .fb-none{font-size:12.5px; color:var(--ink-soft); font-style:italic;}
-  .fb-count{margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);}
-  .fb-count b{color:var(--teal); font-size:13px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:clamp(18px,3vw,34px);}
+  h2.panel-title{font-family:var(--serif); font-size:20px; font-weight:600; margin:0 0 4px;}
+  p.panel-desc{color:var(--ink-soft); font-size:13.5px; max-width:74ch; margin:0 0 24px;}
 
-  h2{font-family:var(--serif); font-size:19px; font-weight:600; margin:34px 0 4px;}
-  .h2sub{color:var(--ink-soft); font-size:13px; margin:0 0 16px; max-width:78ch;}
+  .metrics-total{font-family:var(--mono); font-size:13px; color:var(--ink-soft); margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .metrics-total strong{color:var(--ink); font-size:19px; font-family:var(--serif);}
+  .metrics-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px;}
+  .metric-heading{font-family:var(--serif); font-weight:600; font-size:14.5px; margin:0 0 12px;}
+  .bar-row{margin-bottom:9px;}
+  .bar-label{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;}
+  .bar-label .n{font-family:var(--mono); color:var(--ink-soft);}
+  .bar-track{height:8px; background:var(--paper-dim); border-radius:20px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:20px; background:var(--teal);}
+  .updated-note{font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); margin-top:26px;}
 
-  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:13px; margin:22px 0 6px;}
-  .kpi{background:var(--card); border:1px solid var(--line); border-top:3px solid var(--teal); border-radius:var(--radius); padding:15px 17px;}
-  .kpi .n{font-family:var(--serif); font-size:30px; font-weight:600; line-height:1; display:block;}
-  .kpi .lbl{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-top:7px; display:block;}
-  .kpi .foot{font-size:11.5px; color:var(--ink-soft); margin-top:6px; display:block;}
-  .kpi.i{border-top-color:var(--indigo);} .kpi.i .n{color:var(--indigo);}
-  .kpi.a{border-top-color:var(--amber);} .kpi.a .n{color:var(--amber);}
-  .kpi.c{border-top-color:var(--coral);} .kpi.c .n{color:var(--coral);}
-  .kpi.t .n{color:var(--teal);}
-
-  .flujo{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 19px; margin:16px 0 4px;}
-  .flujo h3{font-family:var(--serif); font-size:15.5px; font-weight:600; margin:0 0 3px;}
-  .flujo p.note{font-size:11.5px; color:var(--ink-soft); margin:0 0 14px;}
-  .fl-bar{display:flex; height:30px; border-radius:6px; overflow:hidden; margin-bottom:10px;}
-  .fl-seg{display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; color:#fff; white-space:nowrap; overflow:hidden;}
-  .fl-seg.cerr{background:var(--teal);} .fl-seg.act{background:var(--amber);} .fl-seg.nop{background:var(--coral);}
-  .fl-leg{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px;}
-  .fl-item{font-size:12.5px; color:var(--ink-soft); border-left:3px solid var(--line); padding-left:11px;}
-  .fl-item b{color:var(--ink); font-family:var(--serif); font-size:15px;}
-  .fl-item.cerr{border-left-color:var(--teal);} .fl-item.act{border-left-color:var(--amber);} .fl-item.nop{border-left-color:var(--coral);}
-
-  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px;}
-  .grid-3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:17px 19px;}
-  .card h3{font-family:var(--serif); font-size:15.5px; font-weight:600; margin:0 0 3px;}
-  .card p.note{font-size:11.5px; color:var(--ink-soft); margin:0 0 13px;}
-  .card p.note .hint{color:var(--indigo);}
-  .chart-wrap{position:relative; height:265px;}
-  .chart-wrap.tall{height:325px;}
-
-  .lede{background:var(--teal-soft); border-left:4px solid var(--teal); border-radius:var(--radius); padding:15px 19px; margin:6px 0 16px; font-size:13.5px;}
-  .lede.amb{background:var(--amber-soft); border-left-color:var(--amber);}
-
-  .otras{display:flex; flex-direction:column; gap:10px;}
-  .ot-fila{display:flex; align-items:baseline; gap:11px; padding-bottom:9px; border-bottom:1px solid #F1EFE9;}
-  .ot-fila:last-child{border-bottom:none; padding-bottom:0;}
-  .ot-n{font-family:var(--serif); font-size:24px; font-weight:600; color:var(--teal); min-width:34px;}
-  .ot-t{font-size:12.5px; color:var(--ink-soft); line-height:1.45;}
-  .ot-t b{color:var(--ink);}
-  .dotacion{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:17px 19px; margin-bottom:16px;}
-  .dot-title{font-family:var(--serif); font-size:15.5px; font-weight:600; margin-bottom:14px;}
-  .dot-row{display:flex; align-items:center; gap:12px; margin-bottom:8px;}
-  .dot-name{font-family:var(--mono); font-size:11px; color:var(--ink-soft); width:132px; flex-shrink:0; text-align:right;}
-  .dot-name.gap{color:var(--coral);}
-  .dot-bar{position:relative; flex:1; height:24px; background:var(--paper-dim); border-radius:5px;}
-  .seg{position:absolute; top:0; height:24px; border-radius:5px; font-family:var(--mono); font-size:10px; color:#fff;
-       display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden;}
-  .seg.pam{background:var(--amber);} .seg.mal{background:var(--indigo);} .seg.jei{background:var(--teal);}
-  .seg.vac{background:repeating-linear-gradient(45deg,#E9CFC3,#E9CFC3 6px,#F5E3DA 6px,#F5E3DA 12px); color:var(--coral); border:1px solid #E0B9A8;}
-  .dot-axis{display:flex; justify-content:space-between; font-family:var(--mono); font-size:10px; color:var(--ink-soft); margin:2px 0 0 144px;}
-
-  table{width:100%; border-collapse:collapse; font-size:13px;}
-  th,td{text-align:left; padding:8px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
-  th{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); background:var(--paper-dim); position:sticky; top:0;}
-  .cod{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
-  .chip{font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:20px; white-space:nowrap;}
-  .chip.Finalizado{background:var(--teal-soft); color:var(--teal);}
-  .chip.Desistido,.chip.Detenido{background:var(--coral-soft); color:var(--coral);}
-  .chip.Enespera,.chip.Enproceso{background:var(--amber-soft); color:var(--amber);}
-  .chip.Derivado{background:var(--indigo-soft); color:var(--indigo);}
-  .table-wrap{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
-  .scroll{max-height:430px; overflow-y:auto;}
-  td.met{white-space:normal; font-size:12.5px; line-height:1.45;}
-  .motivo{color:var(--ink-soft);}
-  .cat{display:inline-block; font-family:var(--mono); font-size:9.5px; padding:1px 7px; border-radius:20px;
-       background:var(--coral-soft); color:var(--coral); margin-right:6px; white-space:nowrap;}
-  .nd{color:var(--ink-soft); opacity:.5;}
-  table.mini{margin-top:14px; font-size:12px;}
-  table.mini th{background:transparent; border-bottom:1px solid var(--line); padding:5px 8px; position:static;}
-  table.mini td{padding:5px 8px; border-bottom:1px solid #F1EFE9;}
-  table.mini td.num{text-align:right; font-family:var(--mono); font-size:11.5px;}
-  table.mini tr.tot td{font-weight:600; border-top:1px solid var(--line); border-bottom:none;}
-  .dot-col{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; vertical-align:middle;}
-  th.sortable{cursor:pointer; user-select:none;}
-  th.sortable:hover{background:#EAE7E0;}
-  th .ind{color:var(--teal); font-size:9px;}
-  .empty{padding:34px; text-align:center; color:var(--ink-soft); font-style:italic;}
-
-  footer{padding:22px clamp(16px,4vw,48px) 40px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); background:var(--card);}
-  footer p{margin:0 0 6px; max-width:82ch;}
+  footer{padding:18px clamp(16px,4vw,48px); font-family:var(--mono); font-size:10.5px; color:var(--ink-soft);}
 </style>
 </head>
 <body>
 
 <header>
-  <p class="eyebrow">Dirección de Innovación · Proyecto BiCI</p>
-  <h1>Equipo Ciencia de Datos — panel ejecutivo</h1>
-  <p class="sub">Apoyo metodológico y analítico a investigadores UANDES, desde el diseño del análisis hasta el informe final. 66 solicitudes entre enero 2024 y agosto 2026, presentadas de forma anónima y agregada.</p>
+  <div class="eyebrow">// equipo-data-science / metricas</div>
+  <h1>Métricas generales</h1>
+  <p class="sub">Conteos agregados del formulario de solicitud de apoyo, sin datos identificables. Se actualizan automáticamente cada semana desde el Excel del formulario. El detalle por solicitud y el proceso completo del equipo viven en otros documentos internos.</p>
 </header>
 
-<div class="filterbar" id="filterbar"></div>
-
 <main>
-  <div class="kpis" id="kpis"></div>
-
-  <div class="flujo" id="flujo"></div>
-
-  <h2>Demanda y capacidad por año</h2>
   <div class="card">
-    <div class="chart-wrap" style="height:230px"><canvas id="c-anio"></canvas></div>
-    <p class="note" style="margin:12px 0 0">Recibidas por año de recepción; cerradas por año de cierre. La porción translúcida son solicitudes que no prosperaron.</p>
+    <h2 class="panel-title">Métricas agregadas del equipo</h2>
+    <p class="panel-desc">Calculadas desde el formulario histórico de solicitudes de apoyo (hoja consolidada del Excel).</p>
+
+    <div class="metrics-total" id="metrics-total"></div>
+
+    <div class="metrics-grid">
+      <div class="metric-block">
+        <h3 class="metric-heading">Por estado</h3>
+        <div id="metric-estado"></div>
+      </div>
+      <div class="metric-block">
+        <h3 class="metric-heading">Por tipo de apoyo solicitado</h3>
+        <div id="metric-tipo"></div>
+      </div>
+      <div class="metric-block">
+        <h3 class="metric-heading">Por facultad / unidad</h3>
+        <div id="metric-facultad"></div>
+      </div>
+      <div class="metric-block">
+        <h3 class="metric-heading">Por año de ingreso</h3>
+        <div id="metric-anio"></div>
+      </div>
+    </div>
+
+    <p class="updated-note" id="updated-note"></p>
   </div>
-
-  <h2>Demanda</h2>
-  <p class="h2sub">De dónde vienen las solicitudes y qué tipo de apoyo piden. Una solicitud puede pedir varios tipos a la vez, por eso ese gráfico suma más que el total.</p>
-  <div class="grid grid-3">
-    <div class="card">
-      <h3>Estado de los requerimientos</h3>
-      <p class="note">Finalizado, Derivado y Desistido son terminales. <span class="hint">Clic para filtrar.</span></p>
-      <div class="chart-wrap"><canvas id="c-estado"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Por facultad o unidad</h3>
-      <p class="note">11 unidades atendidas. <span class="hint">Clic para filtrar.</span></p>
-      <div class="chart-wrap tall"><canvas id="c-fac"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Por tipo de apoyo solicitado</h3>
-      <p class="note">Selección múltiple en el formulario. <span class="hint">Clic para filtrar.</span></p>
-      <div class="chart-wrap tall"><canvas id="c-tipo"></canvas></div>
-    </div>
-  </div>
-
-  <h2>Tiempos por etapa</h2>
-  <p class="h2sub">Días hábiles que toma cada tramo del proceso. Descuenta fines de semana, febrero, feriados y vacaciones del equipo. Solo se promedian los requerimientos donde esa etapa tiene fecha registrada, por lo que el n varía entre tramos.</p>
-  <div class="lede" id="lede-etapas"></div>
-  <div class="grid">
-    <div class="card">
-      <h3>Composición del proceso completo</h3>
-      <p class="note">Promedio de días hábiles de cada etapa, apilados. El largo total es el proceso de punta a punta.</p>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-etapas"></canvas></div>
-      <div id="tabla-etapas"></div>
-    </div>
-    <div class="card">
-      <h3>Ciclos de retroalimentación</h3>
-      <p class="note">Cuántas rondas de cambios pidió el investigador después de la primera entrega.</p>
-      <div class="chart-wrap tall"><canvas id="c-ciclos"></canvas></div>
-    </div>
-  </div>
-
-  <h2>Investigadores que vuelven</h2>
-  <p class="h2sub">Indicador de fidelización: cuántos investigadores solicitan apoyo más de una vez. Se calcula dentro de la selección activa, sin identificar a las personas.</p>
-  <div class="lede" id="lede-recurrencia"></div>
-  <div class="grid">
-    <div class="card">
-      <h3>Distribución de solicitudes por investigador/a</h3>
-      <p class="note">Cuántas personas han pedido apoyo una vez, dos veces, etc.</p>
-      <div class="chart-wrap"><canvas id="c-recdist"></canvas></div>
-    </div>
-  </div>
-
-  <h2>Detalle de solicitudes</h2>
-  <p class="h2sub">Refleja la selección activa. Para los requerimientos ejecutados se indica la metodología aplicada; para los que no prosperaron, el motivo registrado. Sin títulos de proyecto ni nombres: el detalle identificado está en el panel de gestión interno.</p>
-  <div class="table-wrap">
-    <div class="scroll" style="overflow-x:auto">
-      <table style="min-width:980px">
-        <thead><tr>
-          <th style="width:62px" class="sortable" onclick="ordenar('id')">Cód.<span class="ind" id="s-id"></span></th>
-          <th style="width:58px" class="sortable" onclick="ordenar('a')">Año<span class="ind" id="s-a"></span></th>
-          <th style="width:150px" class="sortable" onclick="ordenar('f')">Facultad / Unidad<span class="ind" id="s-f"></span></th>
-          <th style="width:104px" class="sortable" onclick="ordenar('e')">Estado<span class="ind" id="s-e"></span></th>
-          <th class="sortable" onclick="ordenar('met')">Metodología implementada / motivo de cierre<span class="ind" id="s-met"></span></th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div class="empty" id="tempty" style="display:none">Ningún requerimiento cumple con los filtros seleccionados.</div>
-    </div>
-  </div>
-
-  <h2>Formación en R</h2>
-  <p class="h2sub">Cursos y capacitaciones dictados por el equipo a investigadores, docentes y estudiantes de postgrado. Esta sección tiene su propia unidad de análisis —personas, no requerimientos— y no responde a los filtros del panel.</p>
-
-  <div class="kpis" id="kpis-curso"></div>
-
-  <div class="lede" id="lede-curso"></div>
-
-  <div class="table-wrap" style="margin-bottom:16px">
-    <table>
-      <thead><tr><th>Curso</th><th style="width:150px">Fechas</th><th style="width:80px">Sesiones</th><th style="width:90px">Inscritos</th><th style="width:130px">Proyectos finales</th></tr></thead>
-      <tbody id="cursos-body"></tbody>
-    </table>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Participantes por rol</h3>
-      <p class="note">Sobre los dos cursos abiertos, que concentran 93 de los 96 participantes.</p>
-      <div class="chart-wrap"><canvas id="c-rol"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Participantes por facultad o unidad</h3>
-      <p class="note">Catorce unidades representadas, varias que aún no han solicitado apoyo formal.</p>
-      <div class="chart-wrap tall"><canvas id="c-facCurso"></canvas></div>
-    </div>
-  </div>
-
-  <h2>Otras líneas de trabajo</h2>
-  <p class="h2sub">Además de los requerimientos de investigadores, el equipo sostiene una plataforma con un agente automatizado y participa en publicaciones propias. No responden a los filtros del panel.</p>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Agente de la plataforma de portafolio</h3>
-      <p class="note">Servicio automatizado para la Dirección de Innovación, en marcha desde junio 2026.</p>
-      <div class="otras" id="otras-agente"></div>
-    </div>
-    <div class="card">
-      <h3>Publicaciones propias</h3>
-      <p class="note">Papers con participación del equipo en la autoría.</p>
-      <div class="otras" id="otras-papers"></div>
-    </div>
-  </div>
-
-  <h2>Dotación del equipo</h2>
-  <p class="h2sub">Composición del equipo en el período. El apoyo ha sido temporal; la analista principal ha estado presente en todo el tramo.</p>
-  <div class="dotacion">
-    <div class="dot-title">Dotación del equipo</div>
-    <div class="dot-track">
-      <div class="dot-row"><span class="dot-name">Analista principal</span><div class="dot-bar"><span class="seg pam" style="left:0%; width:100%">presente todo el período</span></div></div>
-      <div class="dot-row"><span class="dot-name">Apoyo ingeniería</span><div class="dot-bar"><span class="seg mal" style="left:0%; width:63%">nov 2023 – oct 2025</span></div></div>
-      <div class="dot-row"><span class="dot-name">Apoyo análisis</span><div class="dot-bar"><span class="seg jei" style="left:81%; width:19%">mar – sep 2026</span></div></div>
-    </div>
-    <div class="dot-axis"><span>2024</span><span>2025</span><span>2026</span></div>
-  </div>
-
 </main>
 
-<footer>
-  <p><strong>Fuente:</strong> hoja "PowerBI" del formulario de solicitud de apoyo en gestión y análisis de datos, consolidado 2024–2026. Datos al 10 de agosto de 2026.</p>
-  <p><strong>Cálculo de días:</strong> los tiempos se miden en días hábiles. Se descuentan sábados y domingos, el mes completo de febrero (receso universitario, con cero solicitudes ingresadas en 2025 y 2026), los feriados legales chilenos y las vacaciones registradas del equipo. En los requerimientos solicitados verbalmente cuyo formulario se ingresó después, el reloj parte en la fecha del primer archivo de análisis.</p>
-  <p><strong>Ejecutor:</strong> registrado en la columna Ejecutor del formulario de solicitudes. La analista principal participó en la totalidad de los requerimientos ejecutados; el apoyo de ingeniería de datos estuvo hasta octubre de 2025 y el de análisis desde marzo de 2026.</p>
-  <p><strong>Datos personales:</strong> este panel es anónimo. No incluye nombres de investigadores ni del equipo, correos, títulos de proyecto ni enlaces a informes: solo códigos, unidad académica, metodología aplicada y métricas agregadas. El detalle identificado vive en el panel de gestión interno.</p>
-  <p>Equipo Ciencia de Datos · Proyecto BiCI · Dirección de Innovación · Universidad de los Andes.</p>
-</footer>
+<footer>Equipo Ciencia de Datos · UANDES — página generada automáticamente, sin datos identificables.</footer>
 
 <script>
-const DATA = [{"id":"2_1","inv":"Investigador/a H","k":"i08","f":"Odontología","e":"Finalizado","a":2024,"ac":2024,"t":["Preprocesamiento de datos"],"n":1,"c":109,"ex":"Analista principal","met":"Secuenciación de microbioma; asociación con geolocalización, estilos de vida y dieta","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-15","fr":null,"fm":null,"fi":"2024-01-19","fe":"2024-03-22","fc":"2024-07-17","nc":0,"pr":"Trabajada"},{"id":"3_1","inv":"Investigador/a I","k":"i09","f":"Clínica UAndes","e":"Finalizado","a":2024,"ac":2024,"t":["Gestión de datos"],"n":1,"c":43,"ex":"Analista principal + apoyo","met":"Estructuración y limpieza de base de datos; resumen descriptivo","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-16","fr":"2024-01-16","fm":"2024-02-01","fi":"2024-01-15","fe":"2024-02-07","fc":null,"nc":0,"pr":"Trabajada"},{"id":"4_1","inv":"Investigador/a J","k":"i10","f":"Enfermería y Obstetricia","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos"],"n":1,"c":123,"ex":"Analista principal","met":"Modelo bayesiano espacio-temporal (BYM con INLA)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-16","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"Trabajada"},{"id":"5_1","inv":"Investigador/a K","k":"i11","f":"CIIB","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos"],"n":1,"c":262,"ex":"Analista principal + apoyo","met":"Análisis de reacciones adversas y recurrencia oncológica sobre datos FDA","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-16","fr":null,"fm":null,"fi":null,"fe":"2024-06-12","fc":"2024-06-24","nc":3,"pr":"Trabajada"},{"id":"6_1","inv":"Investigador/a C","k":"i03","f":"Odontología","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico","Reporte de resultados"],"n":3,"c":452,"ex":"Analista principal + apoyo","met":"Modelo predictivo de metástasis a partir de marcadores en linfonodos","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-17","fr":null,"fm":"2024-03-06","fi":null,"fe":"2024-01-23","fc":null,"nc":3,"pr":"Trabajada"},{"id":"7_1","inv":"Investigador/a L","k":"i12","f":"Cs. Sociales","e":"Desistido","a":2024,"ac":null,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"No alcanzó a preparar y entregar las bases de datos comprometidas.","cat":"Sin datos","lp":false,"vb":false,"fi0":"2024-01-21","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"8_1","inv":"Investigador/a A","k":"i01","f":"CIIL Uandes","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico"],"n":7,"c":7,"ex":"Analista principal","met":"Fiabilidad y análisis factorial confirmatorio de escala","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-01-22","fr":null,"fm":null,"fi":null,"fe":"2024-02-20","fc":"2024-02-20","nc":0,"pr":"Trabajada"},{"id":"10_1","inv":"Investigador/a A","k":"i01","f":"CIIL Uandes","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico"],"n":7,"c":43,"ex":"Analista principal","met":"Propensity score matching para construir grupo de control","mot":"","cat":"","lp":false,"vb":true,"fi0":"2024-01-16","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"Trabajada"},{"id":"11_1","inv":"Investigador/a D","k":"i04","f":"Cs. Sociales","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico","Reporte de resultados","Visualización de datos"],"n":3,"c":32,"ex":"Analista principal","met":"Análisis secuencial de interacciones (inicio–respuesta–seguimiento)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-02-22","fr":null,"fm":"2024-04-01","fi":"2024-04-05","fe":"2024-04-09","fc":"2024-04-17","nc":3,"pr":"Trabajada"},{"id":"12_1","inv":"Investigador/a M","k":"i13","f":"Clínica UAndes","e":"Desistido","a":2024,"ac":null,"t":["Gestión de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"La captura de datos la asumió el equipo de sistemas de la Clínica.","cat":"Resuelto por otra vía","lp":false,"vb":false,"fi0":"2024-02-26","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"13_1","inv":"Investigador/a N","k":"i14","f":"Odontología","e":"Derivado","a":2024,"ac":null,"t":["Gestión de datos","Otros"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Derivado al encargado institucional de la plataforma de captura de datos.","cat":"Resuelto por otra vía","lp":false,"vb":false,"fi0":"2024-02-26","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"14_1","inv":"Investigador/a O","k":"i15","f":"Odontología","e":"Desistido","a":2024,"ac":null,"t":["Análisis estadístico","Reporte de resultados","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"No respondió a las gestiones de seguimiento posteriores a la coordinación.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2024-03-01","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"15_1","inv":"Investigador/a P","k":"i16","f":"Dir. de Innovación","e":"Finalizado","a":2024,"ac":2024,"t":["Otros"],"n":1,"c":10,"ex":"Analista principal","met":"Asesoría metodológica: revisión de estructura del cuestionario; el equipo implementó los cambios","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-03-04","fr":null,"fm":null,"fi":"2024-03-08","fe":"2024-03-12","fc":null,"nc":0,"pr":"Trabajada"},{"id":"16_1","inv":"Investigador/a Q","k":"i17","f":"CIIB","e":"Finalizado","a":2024,"ac":2025,"t":["Gestión de datos","Preprocesamiento de datos","Visualización de datos"],"n":1,"c":217,"ex":"Analista principal","met":"Modelos de asociación entre distrés materno y trayectoria de neurodesarrollo","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-03-13","fr":null,"fm":null,"fi":"2024-03-07","fe":null,"fc":null,"nc":null,"pr":"Trabajada"},{"id":"17_1","inv":"Investigador/a E","k":"i05","f":"Medicina","e":"Finalizado","a":2024,"ac":2026,"t":["Análisis estadístico","Gestión de datos","Visualización de datos"],"n":2,"c":522,"ex":"Analista principal","met":"Modelos de clasificación diagnóstica","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-03-20","fr":null,"fm":"2025-02-25","fi":"2024-12-13","fe":"2025-01-10","fc":"2025-03-18","nc":2,"pr":"Trabajada"},{"id":"18_1","inv":"Investigador/a R","k":"i18","f":"Odontología","e":"Desistido","a":2024,"ac":null,"t":["Análisis estadístico","Gestión de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Los datos dependían de una fundación externa y nunca fueron entregados.","cat":"Sin datos","lp":false,"vb":false,"fi0":"2024-04-09","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"19_1","inv":"Investigador/a S","k":"i19","f":"Enfermería y Obstetricia","e":"Desistido","a":2024,"ac":null,"t":["Análisis estadístico"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"No continuó el intercambio tras la reunión inicial.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2024-04-29","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"20_1","inv":"Investigador/a T","k":"i20","f":"Comunicación","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico","Reporte de resultados","Visualización de datos"],"n":1,"c":45,"ex":"Analista principal","met":"Análisis de clases latentes para segmentación de consumidores","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-05-06","fr":null,"fm":null,"fi":"2024-07-05","fe":"2024-07-10","fc":null,"nc":1,"pr":"Trabajada"},{"id":"21_1","inv":"Investigador/a A","k":"i01","f":"Cs. Sociales","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico"],"n":7,"c":209,"ex":"Analista principal","met":"Modelo de mediación estadística","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-05-06","fr":null,"fm":null,"fi":null,"fe":"2024-07-19","fc":null,"nc":3,"pr":"Trabajada"},{"id":"22_1","inv":"Investigador/a U","k":"i21","f":"Odontología","e":"Desistido","a":2024,"ac":null,"t":["Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Indicó verbalmente que no continuaría. Sin registro escrito del motivo.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2024-06-03","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"23_1","inv":"Investigador/a C","k":"i03","f":"Odontología","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico"],"n":3,"c":null,"ex":"Analista principal + apoyo","met":"Diseño de observatorio epidemiológico; descriptivos por territorio","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-06-05","fr":"2024-06-05","fm":null,"fi":null,"fe":null,"fc":null,"nc":1,"pr":"Trabajada"},{"id":"24_1","inv":"Investigador/a V","k":"i22","f":"Investigación y Doctorado","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":25,"ex":"Analista principal","met":"Diagnóstico descriptivo y clasificación de programas","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-06-10","fr":"2024-06-17","fm":"2024-07-11","fi":"2024-07-04","fe":"2024-06-17","fc":"2024-07-26","nc":2,"pr":"Trabajada"},{"id":"25_1","inv":"Investigador/a W","k":"i23","f":"Enfermería y Obstetricia","e":"Desistido","a":2024,"ac":null,"t":["Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Cambió la contraparte del proyecto y no se obtuvo acceso a las plataformas.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2024-06-10","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"26_1","inv":"Investigador/a X","k":"i24","f":"Investigación y Doctorado","e":"Derivado","a":2024,"ac":null,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"La información disponible resultó insuficiente para construir proyecciones confiables.","cat":"Sin datos","lp":false,"vb":false,"fi0":"2024-08-05","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"27_1","inv":"Investigador/a Y","k":"i25","f":"Cs. Sociales","e":"Desistido","a":2024,"ac":null,"t":["Gestión de datos","Preprocesamiento de datos","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"No respondió al seguimiento tras la entrega de fuentes de información.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2024-08-07","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"28_1","inv":"Investigador/a C","k":"i03","f":"Odontología","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico"],"n":3,"c":209,"ex":"Analista principal + apoyo","met":"Modelos predictivos de machine learning (clasificación)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-08-26","fr":"2024-08-16","fm":"2024-11-29","fi":"2024-08-26","fe":"2024-10-15","fc":null,"nc":1,"pr":"Trabajada"},{"id":"29_1","inv":"Investigador/a Z","k":"i26","f":"Dir. de Innovación","e":"En proceso","a":2024,"ac":null,"t":["Gestión de datos","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"Modelo de datos e indicadores; desarrollo de plataforma web de visualización","mot":"","cat":"","lp":true,"vb":false,"fi0":"2024-10-03","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"Trabajada"},{"id":"30_1","inv":"Investigador/a [","k":"i27","f":"Medicina","e":"Finalizado","a":2024,"ac":2024,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":26,"ex":"Analista principal","met":"Análisis descriptivo de encuesta","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-10-18","fr":"2024-10-18","fm":"2024-12-11","fi":"2024-10-18","fe":"2024-12-11","fc":"2024-12-18","nc":1,"pr":"Trabajada"},{"id":"31_1","inv":"Investigador/a \\","k":"i28","f":"Otras unidades","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":50,"ex":"Analista principal","met":"Modelos de regresión sobre intención emprendedora","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-11-29","fr":"2024-11-29","fm":null,"fi":"2024-11-29","fe":"2024-12-13","fc":null,"nc":0,"pr":"Trabajada"},{"id":"32_1","inv":"Investigador/a ]","k":"i29","f":"Odontología","e":"Finalizado","a":2024,"ac":2025,"t":["Análisis estadístico","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":29,"ex":"Analista principal","met":"Diseño de encuestas y análisis descriptivo por segmento","mot":"","cat":"","lp":false,"vb":false,"fi0":"2024-12-30","fr":"2025-01-22","fm":"2025-03-03","fi":"2025-01-22","fe":"2025-01-24","fc":null,"nc":1,"pr":"Trabajada"},{"id":"33_1","inv":"Investigador/a ^","k":"i30","f":"Medicina","e":"Finalizado","a":2025,"ac":2025,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":152,"ex":"Analista principal","met":"Análisis descriptivo de consumo alimentario","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-03-05","fr":"2025-05-07","fm":"2025-03-19","fi":"2025-03-31","fe":"2025-05-09","fc":"2025-05-13","nc":0,"pr":"Trabajada"},{"id":"34_1","inv":"Investigador/a _","k":"i31","f":"Comunicación","e":"Desistido","a":2025,"ac":null,"t":["Análisis estadístico","Gestión de datos","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"La coordinación no prosperó por baja disponibilidad de agenda del equipo solicitante.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2025-03-05","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"35_1","inv":"Investigador/a F","k":"i06","f":"Comunicación","e":"Finalizado","a":2025,"ac":2025,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":2,"c":25,"ex":"Analista principal","met":"Análisis descriptivo e inferencial de encuesta","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-03-21","fr":null,"fm":"2025-05-16","fi":null,"fe":"2025-05-16","fc":"2025-05-30","nc":2,"pr":"Trabajada"},{"id":"37_1","inv":"Investigador/a `","k":"i32","f":"CIIB","e":"Finalizado","a":2025,"ac":2025,"t":["Gestión de datos","Visualización de datos"],"n":1,"c":110,"ex":"Analista principal","met":"Reducción de dimensionalidad y machine learning sobre biomarcadores","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-05-06","fr":"2025-04-25","fm":null,"fi":"2025-04-28","fe":null,"fc":"2025-06-04","nc":1,"pr":"Trabajada"},{"id":"38_1","inv":"Investigador/a a","k":"i33","f":"Medicina","e":"Finalizado","a":2025,"ac":2026,"t":["Análisis estadístico","Preprocesamiento de datos"],"n":1,"c":210,"ex":"Analista principal","met":"Análisis descriptivo y asociación de lesiones concomitantes","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-05-15","fr":null,"fm":null,"fi":"2025-05-20","fe":"2026-01-26","fc":"2026-01-27","nc":0,"pr":"Trabajada"},{"id":"39_1","inv":"Investigador/a b","k":"i34","f":"Otras unidades","e":"Finalizado","a":2025,"ac":2025,"t":["Análisis estadístico"],"n":1,"c":109,"ex":"Analista principal","met":"Análisis de escalas Likert; perfiles de motivación","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-05-26","fr":"2025-06-10","fm":"2025-06-10","fi":"2025-05-28","fe":"2025-07-11","fc":null,"nc":2,"pr":"Trabajada"},{"id":"40_1","inv":"Investigador/a c","k":"i35","f":"Comunicación","e":"Finalizado","a":2025,"ac":2026,"t":["Análisis estadístico","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":211,"ex":"Analista principal","met":"Cálculo de ponderadores muestrales (rake weighting)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-06-09","fr":null,"fm":"2026-01-16","fi":"2026-01-16","fe":"2025-11-26","fc":"2026-03-13","nc":2,"pr":"Trabajada"},{"id":"41_1","inv":"Investigador/a d","k":"i36","f":"Otras unidades","e":"Desistido","a":2025,"ac":null,"t":["Gestión de datos","Preprocesamiento de datos","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"El investigador dejó de responder tras la propuesta de automatizar la extracción de datos.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2025-06-19","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"42_1","inv":"Investigador/a e","k":"i37","f":"Cs. Sociales","e":"Finalizado","a":2025,"ac":2025,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos"],"n":1,"c":72,"ex":"Analista principal","met":"IRT bifactor con valores plausibles; AFC de segundo orden","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-07-01","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"Trabajada"},{"id":"44_1","inv":"Investigador/a f","k":"i38","f":"Clínica UAndes","e":"Finalizado","a":2025,"ac":2025,"t":["Visualización de datos"],"n":1,"c":null,"ex":"Analista principal","met":"Análisis descriptivo e inferencial de fertilidad","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-07-29","fr":null,"fm":"2025-07-25","fi":"2025-07-28","fe":"2025-08-26","fc":"2025-09-04","nc":2,"pr":"Trabajada"},{"id":"45_1","inv":"Investigador/a A","k":"i01","f":"Cs. Sociales","e":"Desistido","a":2025,"ac":null,"t":["Análisis estadístico","Gestión de datos"],"n":7,"c":null,"ex":"Sin ejecución","met":"","mot":"Quedó detenido a la espera de definiciones pendientes del equipo investigador.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2025-08-06","fr":null,"fm":null,"fi":null,"fe":null,"fc":null,"nc":null,"pr":"No prosperó"},{"id":"47_1","inv":"Investigador/a g","k":"i39","f":"Medicina","e":"Finalizado","a":2025,"ac":2026,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":158,"ex":"Analista principal","met":"Análisis secundario ponderado de encuesta nacional","mot":"","cat":"","lp":false,"vb":false,"fi0":"2025-10-12","fr":"2025-10-06","fm":"2025-10-10","fi":"2026-01-20","fe":"2026-03-03","fc":"2026-03-23","nc":1,"pr":"Trabajada"},{"id":"11","inv":"Investigador/a G","k":"i07","f":"Cs. Sociales","e":"En espera","a":2026,"ac":null,"t":["Análisis estadístico","Preprocesamiento de datos"],"n":2,"c":null,"ex":"Analista principal","met":"Análisis de clases latentes; diseño cuasi-experimental pre/post pandemia","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-01-15","fr":"2026-01-19","fm":"2026-01-22","fi":"2026-01-28","fe":"2026-02-02","fc":null,"nc":2,"pr":"Trabajada"},{"id":"8","inv":"Investigador/a B","k":"i02","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico"],"n":4,"c":53,"ex":"Analista principal","met":"Modelo multinivel (HLM): desempeño matemático y autoeficacia","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-01-12","fr":"2026-01-12","fm":"2026-01-13","fi":"2026-01-28","fe":"2026-05-02","fc":null,"nc":2,"pr":"Trabajada"},{"id":"6","inv":"Investigador/a A","k":"i01","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico"],"n":7,"c":61,"ex":"Analista principal","met":"Descriptivos por tramo de puntaje y tipo de establecimiento","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-01-12","fr":"2026-01-12","fm":"2026-01-23","fi":"2026-04-14","fe":"2026-04-29","fc":"2026-05-15","nc":1,"pr":"Trabajada"},{"id":"9","inv":"Investigador/a h","k":"i40","f":"Dir. de Innovación","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":57,"ex":"Analista principal","met":"Análisis de redes sociales (SNA); detección de comunidades","mot":"","cat":"","lp":false,"vb":true,"fi0":"2025-11-07","fr":null,"fm":null,"fi":null,"fe":"2026-01-12","fc":"2026-03-13","nc":3,"pr":"Trabajada"},{"id":"5","inv":"Investigador/a i","k":"i41","f":"Enfermería y Obstetricia","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":71,"ex":"Analista principal","met":"Validación de encuesta; comparación de percepción pre/post","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-01-12","fr":"2026-01-12","fm":"2026-01-13","fi":"2026-01-14","fe":"2026-01-23","fc":"2026-06-05","nc":2,"pr":"Trabajada"},{"id":"7","inv":"Investigador/a j","k":"i42","f":"Cs. Sociales","e":"Desistido","a":2026,"ac":null,"t":["Gestión de datos","Preprocesamiento de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Solicitó pausar el apoyo mientras completaba la revisión de sus datos.","cat":"Sin datos","lp":false,"vb":false,"fi0":"2026-01-12","fr":"2026-01-12","fm":null,"fi":null,"fe":null,"fc":"2026-03-11","nc":0,"pr":"No prosperó"},{"id":"10","inv":"Investigador/a k","k":"i43","f":"Medicina","e":"Desistido","a":2026,"ac":null,"t":["Análisis estadístico","Preprocesamiento de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"No se concretó la reunión agendada ni hubo respuesta al recordatorio.","cat":"Sin respuesta","lp":false,"vb":false,"fi0":"2026-01-14","fr":"2026-01-14","fm":"2026-01-29","fi":null,"fe":null,"fc":null,"nc":0,"pr":"No prosperó"},{"id":"12","inv":"Investigador/a l","k":"i44","f":"Comunicación","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":74,"ex":"Analista principal + apoyo","met":"Análisis de contenido; asociación entre retórica populista y engagement","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-03-13","fr":"2026-03-13","fm":"2026-03-17","fi":"2026-03-13","fe":"2026-04-28","fc":"2026-07-30","nc":1,"pr":"Trabajada"},{"id":"13","inv":"Investigador/a D","k":"i04","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Otros","Preprocesamiento de datos","Reporte de resultados"],"n":3,"c":2,"ex":"Analista principal","met":"Cálculo de tamaño muestral; diseño de validación de instrumento","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-03-18","fr":"2026-03-18","fm":"2026-03-18","fi":"2026-03-19","fe":"2026-03-20","fc":"2026-03-20","nc":0,"pr":"Trabajada"},{"id":"14","inv":"Investigador/a G","k":"i07","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico"],"n":2,"c":3,"ex":"Analista principal","met":"Asesoría metodológica sobre análisis con datos agregados","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-03-19","fr":"2026-03-19","fm":"2026-03-24","fi":null,"fe":null,"fc":null,"nc":0,"pr":"Trabajada"},{"id":"15","inv":"Investigador/a A","k":"i01","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico"],"n":7,"c":59,"ex":"Analista principal","met":"Análisis de clases latentes para perfiles docentes","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-03-25","fr":"2026-03-25","fm":"2026-04-15","fi":"2026-04-16","fe":"2026-05-29","fc":null,"nc":1,"pr":"Trabajada"},{"id":"16","inv":"Investigador/a m","k":"i45","f":"Medicina","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":57,"ex":"Analista principal + apoyo","met":"Sensibilidad, especificidad, valores predictivos y razones de verosimilitud","mot":"","cat":"","lp":false,"vb":true,"fi0":"2026-03-27","fr":"2026-03-27","fm":"2026-03-31","fi":"2026-03-31","fe":"2026-05-18","fc":"2026-05-19","nc":0,"pr":"Trabajada"},{"id":"17","inv":"Investigador/a n","k":"i46","f":"Medicina","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":67,"ex":"Analista principal + apoyo","met":"Concordancia diagnóstica ecográfica validada con histopatología","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-04-02","fr":"2026-04-07","fm":"2026-04-30","fi":"2026-05-04","fe":"2026-06-18","fc":null,"nc":0,"pr":"Trabajada"},{"id":"18","inv":"Investigador/a F","k":"i06","f":"Comunicación","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico","Preprocesamiento de datos","Visualización de datos"],"n":2,"c":52,"ex":"Analista principal","met":"Análisis descriptivo con ponderadores poblacionales por país","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-04-13","fr":"2026-04-13","fm":"2026-04-16","fi":"2026-05-08","fe":"2026-05-28","fc":"2026-05-28","nc":0,"pr":"Trabajada"},{"id":"19","inv":"Investigador/a B","k":"i02","f":"Cs. Sociales","e":"Finalizado","a":2026,"ac":2026,"t":["Análisis estadístico"],"n":4,"c":32,"ex":"Analista principal","met":"Análisis de clases latentes de perfiles vocacionales","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-04-16","fr":"2026-04-16","fm":"2026-04-22","fi":"2026-04-22","fe":"2026-05-15","fc":"2026-05-27","nc":2,"pr":"Trabajada"},{"id":"20","inv":"Investigador/a B","k":"i02","f":"Cs. Sociales","e":"Detenido","a":2026,"ac":null,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Visualización de datos"],"n":4,"c":null,"ex":"Analista principal","met":"Diseño de análisis mixto de contenido (pendiente de inicio)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-04-17","fr":"2026-07-20","fm":null,"fi":null,"fe":null,"fc":null,"nc":0,"pr":"Trabajada"},{"id":"21","inv":"Investigador/a o","k":"i47","f":"Comunicación","e":"En espera","a":2026,"ac":null,"t":["Gestión de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":null,"ex":"Analista principal","met":"Análisis de contenido; asociación entre atributos de la cobertura","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-05-08","fr":"2026-05-11","fm":"2026-05-13","fi":"2026-06-04","fe":"2026-07-01","fc":null,"nc":1,"pr":"Trabajada"},{"id":"22","inv":"Investigador/a p","k":"i48","f":"Enfermería y Obstetricia","e":"Desistido","a":2026,"ac":null,"t":["Análisis estadístico","Gestión de datos","Preprocesamiento de datos","Reporte de resultados","Visualización de datos"],"n":1,"c":null,"ex":"Sin ejecución","met":"","mot":"Postergó el apoyo por carga de trabajo; quedó de retomar el contacto cuando tuviera disponibilidad.","cat":"Proyecto postergado","lp":false,"vb":false,"fi0":"2026-05-14","fr":"2026-05-14","fm":null,"fi":null,"fe":null,"fc":"2026-06-03","nc":0,"pr":"No prosperó"},{"id":"23","inv":"Investigador/a q","k":"i49","f":"Cs. Sociales","e":"Detenido","a":2026,"ac":null,"t":["Análisis estadístico","Reporte de resultados"],"n":1,"c":null,"ex":"Sin ejecución","met":"Análisis de redes epistémicas (ENA) y análisis secuencial lag (pendiente)","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-06-05","fr":"2026-06-08","fm":"2026-06-16","fi":"2026-06-16","fe":null,"fc":null,"nc":0,"pr":"Trabajada"},{"id":"24","inv":"Investigador/a D","k":"i04","f":"Cs. Sociales","e":"En proceso","a":2026,"ac":null,"t":["Preprocesamiento de datos"],"n":3,"c":null,"ex":"Analista principal + apoyo","met":"Coeficiente kappa; análisis secuencial de secuencias IRS","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-06-11","fr":"2026-06-11","fm":"2026-07-13","fi":"2026-07-10","fe":"2026-07-20","fc":null,"nc":1,"pr":"Trabajada"},{"id":"25","inv":"Investigador/a A","k":"i01","f":"Cs. Sociales","e":"En espera","a":2026,"ac":null,"t":["Análisis estadístico"],"n":7,"c":null,"ex":"Analista principal","met":"Comparación pre/post con pruebas pareadas; regresiones sobre puntajes de cambio","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-06-23","fr":"2026-06-11","fm":null,"fi":"2026-06-23","fe":"2026-06-24","fc":null,"nc":1,"pr":"Trabajada"},{"id":"26","inv":"Investigador/a E","k":"i05","f":"Medicina","e":"Finalizado","a":2026,"ac":2026,"t":["Gestión de datos"],"n":2,"c":64,"ex":"Analista principal + apoyo","met":"Distancia de Wasserstein y entropía de Shannon sobre datos morfométricos","mot":"","cat":"","lp":false,"vb":true,"fi0":"2026-03-23","fr":"2026-06-24","fm":null,"fi":"2026-06-22","fe":"2026-07-01","fc":"2026-07-02","nc":0,"pr":"Trabajada"},{"id":"27","inv":"Investigador/a r","k":"i50","f":"Cs. Sociales","e":"En proceso","a":2026,"ac":null,"t":["Análisis estadístico","Otros","Visualización de datos"],"n":1,"c":null,"ex":"Analista principal + apoyo","met":"Codificación de preguntas abiertas; análisis descriptivo","mot":"","cat":"","lp":false,"vb":false,"fi0":"2026-07-28","fr":"2026-07-27","fm":"2026-07-28","fi":null,"fe":null,"fc":null,"nc":0,"pr":"Trabajada"},{"id":"28","inv":"Investigador/a B","k":"i02","f":"Cs. Sociales","e":"En espera","a":2026,"ac":null,"t":["Análisis estadístico"],"n":4,"c":null,"ex":"Analista principal","met":"Revisión metodológica: análisis de invarianza de medición por género (escala FIT-Choice). Pendiente de inicio","mot":"","cat":"","lp":false,"vb":true,"fi0":"2026-04-09","fr":"2026-08-03","fm":"2026-08-04","fi":"2026-08-05","fe":null,"fc":null,"nc":0,"pr":"Trabajada"}];
+/* =========================================================================
+   DATOS — este bloque se regenera automáticamente cada semana a partir del
+   Excel del formulario. No editar a mano: los cambios se pierden en el
+   próximo refresco automático (ver scripts/actualizar_metricas.R).
+   ========================================================================= */
 
-const TEAL='#2E6E63', AZUL='#3D4E8C', AMBAR='#B07C2A', CORAL='#C4562F', GRIS='#C7C4BC', ORO='#D4A853', TIERRA='#B0785A';
-const COL_ESTADO = {'Finalizado':TEAL,'Desistido':CORAL,'En espera':AMBAR,'En proceso':ORO,'Derivado':AZUL,'Detenido':TIERRA};
-const ORD_ESTADO = ['Finalizado','Desistido','En espera','En proceso','Derivado','Detenido'];
-const ORD_ANIO = [2024,2025,2026];
-const ORD_FAC = ['Cs. Sociales','Odontología','Medicina','Comunicación','Enfermería y Obstetricia','Clínica UAndes','CIIB','Dir. de Innovación','CIIL Uandes','Investigación y Doctorado','Otras unidades'];
-const ORD_TIPO = ['Análisis estadístico','Gestión de datos','Visualización de datos','Preprocesamiento de datos','Reporte de resultados','Otros'];
-const DIM_LABEL = {a:'Año', e:'Estado', f:'Unidad', t:'Tipo de apoyo', k:'Investigador/a', ac:'Año de cierre', ex:'Ejecutor', pr:'Resultado'};
-
-const ORD_EX = ['Analista principal','Analista principal + apoyo','Sin ejecución'];
-const COL_EX = {'Analista principal':AMBAR,'Analista principal + apoyo':TEAL,'Sin ejecución':GRIS};
-const NO_HABIL = new Set(["2025-01-01", "2025-04-18", "2025-04-19", "2025-05-01", "2025-05-21", "2025-06-20", "2025-06-29", "2025-07-16", "2025-08-15", "2025-09-18", "2025-09-19", "2025-10-12", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-31", "2025-11-01", "2025-12-08", "2025-12-25", "2026-01-01", "2026-04-03", "2026-04-04", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-05-01", "2026-05-21", "2026-06-21", "2026-06-29", "2026-07-16", "2026-08-15", "2026-09-18", "2026-09-19", "2026-10-12", "2026-10-31", "2026-11-01", "2026-12-08", "2026-12-25"]);
-const F = {a:new Set(), e:new Set(), f:new Set(), t:new Set(), k:new Set(), ac:new Set(), ex:new Set(), pr:new Set()};
-
-Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-Chart.defaults.font.size = 11.5;
-Chart.defaults.color = '#6B7280';
-Chart.defaults.animation.duration = 320;
-
-function pasa(r, omitir){
-  for(const d of Object.keys(F)){
-    if(d === omitir || F[d].size === 0) continue;
-    if(d === 't'){ if(!r.t.some(x => F.t.has(x))) return false; }
-    else if(!F[d].has(r[d])) return false;
-  }
-  return true;
-}
-// Filtrado cruzado estricto: TODOS los graficos responden a TODOS los filtros,
-// incluida su propia dimension. Seleccionar un año deja el resto en cero.
-const sel = () => DATA.filter(r => pasa(r));
-
-function toggle(dim, val){
-  F[dim].has(val) ? F[dim].delete(val) : F[dim].add(val);
-  render();
-}
-function limpiar(){ Object.keys(F).forEach(d => F[d].clear()); render(); }
-
-function esHabil(d){
-  const dow = d.getDay();
-  if(dow === 0 || dow === 6) return false;
-  if(d.getMonth() === 1) return false;
-  const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  return !NO_HABIL.has(k);
-}
-function habiles(a, b){
-  if(!a || !b) return null;
-  const A = new Date(a + 'T00:00:00'), B = new Date(b + 'T00:00:00');
-  if(isNaN(A) || isNaN(B) || B < A) return null;
-  let n = 0; const c = new Date(A);
-  while(c < B){ c.setDate(c.getDate()+1); if(esHabil(c)) n++; }
-  return n;
-}
-function promedio(a){ return a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0; }
-function mediana(a){
-  if(!a.length) return 0;
-  const b = a.slice().sort((x,y)=>x-y), m = Math.floor(b.length/2);
-  return b.length % 2 ? b[m] : Math.round((b[m-1]+b[m])/2);
-}
-
-function conteo(rows, dim, orden){
-  const m = new Map(orden.map(o => [o, 0]));
-  rows.forEach(r => {
-    const vals = dim === 't' ? r.t : [r[dim]];
-    vals.forEach(v => { if(m.has(v)) m.set(v, m.get(v)+1); });
-  });
-  return orden.map(o => m.get(o));
-}
-
-function colores(orden, dim, base){
-  return orden.map(o => (F[dim].size && !F[dim].has(o)) ? GRIS : (typeof base === 'function' ? base(o) : base));
-}
-
-function mkClick(dim, orden){
-  return (evt, els, chart) => {
-    if(!els.length) return;
-    toggle(dim, orden[els[0].index]);
-  };
-}
-
-const sinGrid = {grid:{display:false}, border:{display:false}};
-const conGrid = {grid:{color:'#EFEDE7'}, border:{display:false}, ticks:{precision:0}};
-const baseBar = (dim, orden) => ({responsive:true, maintainAspectRatio:false, onClick:mkClick(dim,orden),
-  onHover:(e,el)=>{ e.native.target.style.cursor = el.length ? 'pointer' : 'default'; },
-  plugins:{legend:{display:false}}});
-
-const CH = {};
-
-CH.anio = new Chart(document.getElementById('c-anio'), {
-  type:'bar',
-  data:{labels:['2024','2025','2026 (a ago)'], datasets:[
-    {label:'Recibidas — trabajadas',     data:[], stack:'rec', maxBarThickness:34},
-    {label:'Recibidas — no prosperaron', data:[], stack:'rec', borderRadius:5, maxBarThickness:34},
-    {label:'Cerradas (año de cierre)',   data:[], stack:'cer', borderRadius:5, maxBarThickness:34}]},
-  options:{responsive:true, maintainAspectRatio:false,
-    onClick:(e,els)=>{
-      if(!els.length) return;
-      const y = ORD_ANIO[els[0].index], di = els[0].datasetIndex;
-      if(di === 2) { toggle('ac', y); return; }
-      // segmentos de recibidas: filtran por año de recepcion y por resultado
-      const res = di === 0 ? 'Trabajada' : 'No prosperó';
-      const yaEsta = F.a.has(y) && F.pr.has(res);
-      F.a.clear(); F.pr.clear();
-      if(!yaEsta) { F.a.add(y); F.pr.add(res); }
-      render();
-    },
-    onHover:(e,el)=>{ e.native.target.style.cursor = el.length ? 'pointer' : 'default'; },
-    plugins:{legend:{position:'bottom', labels:{boxWidth:11, boxHeight:11, padding:12, usePointStyle:true, pointStyle:'circle'}}},
-    scales:{x:Object.assign({stacked:true},sinGrid), y:Object.assign({stacked:true, beginAtZero:true},conGrid)}}
-});
-
-CH.estado = new Chart(document.getElementById('c-estado'), {
-  type:'doughnut', data:{labels:ORD_ESTADO, datasets:[{data:[], borderWidth:2, borderColor:'#fff'}]},
-  options:{responsive:true, maintainAspectRatio:false, cutout:'55%', onClick:mkClick('e',ORD_ESTADO),
-    onHover:(e,el)=>{ e.native.target.style.cursor = el.length ? 'pointer' : 'default'; },
-    plugins:{legend:{position:'right', labels:{boxWidth:10, boxHeight:10, padding:10, usePointStyle:true, pointStyle:'circle'}}}}
-});
-
-CH.fac = new Chart(document.getElementById('c-fac'), {
-  type:'bar', data:{labels:ORD_FAC, datasets:[{data:[], borderRadius:5, maxBarThickness:20}]},
-  options:Object.assign(baseBar('f',ORD_FAC), {indexAxis:'y', scales:{y:sinGrid, x:Object.assign({beginAtZero:true},conGrid)}})
-});
-
-CH.tipo = new Chart(document.getElementById('c-tipo'), {
-  type:'bar', data:{labels:ORD_TIPO, datasets:[{data:[], borderRadius:5, maxBarThickness:20}]},
-  options:Object.assign(baseBar('t',ORD_TIPO), {indexAxis:'y', scales:{y:sinGrid, x:Object.assign({beginAtZero:true},conGrid)}})
-});
-
-const TRAMOS = [
-  ['Recepción → Respuesta','fi0','fr'],
-  ['Respuesta → Reunión','fr','fm'],
-  ['Reunión → Inicio análisis','fm','fi'],
-  ['Inicio → 1ª entrega','fi','fe'],
-  ['1ª entrega → Cierre','fe','fc'],
-  ['Total: inicio → cierre','fi0','fc']
-];
-
-const COL_TRAMO = ['#2E6E63','#4E8C7E','#B07C2A','#C4562F','#3D4E8C'];
-
-CH.etapas = new Chart(document.getElementById('c-etapas'), {
-  type:'bar',
-  data:{labels:['Proceso completo'], datasets:TRAMOS.slice(0,5).map((t,i)=>({
-    label:t[0], data:[0], backgroundColor:COL_TRAMO[i], borderWidth:1, borderColor:'#fff', maxBarThickness:56
-  }))},
-  options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
-    scales:{y:Object.assign({stacked:true},sinGrid),
-            x:Object.assign({stacked:true, beginAtZero:true, title:{display:true, text:'días hábiles (promedio acumulado)'}},conGrid)},
-    plugins:{legend:{position:'bottom', labels:{boxWidth:11, boxHeight:11, padding:10, usePointStyle:true, pointStyle:'circle'}},
-      tooltip:{callbacks:{label:(c)=>{
-        const e = CH.etapas._meta[c.datasetIndex];
-        return c.dataset.label + ': ' + e.prom + ' días (mediana ' + e.med + ', n=' + e.n + ')';
-      }}}}}
-});
-
-CH.ciclos = new Chart(document.getElementById('c-ciclos'), {
-  type:'bar',
-  data:{labels:['0 ciclos','1 ciclo','2 ciclos','3 ciclos'], datasets:[{data:[], backgroundColor:[TEAL,AMBAR,'#C4762F',CORAL], borderRadius:5, maxBarThickness:52}]},
-  options:{responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y + ' requerimientos'}}},
-    scales:{x:sinGrid, y:Object.assign({beginAtZero:true},conGrid)}}
-});
-
-CH.recdist = new Chart(document.getElementById('c-recdist'), {
-  type:'bar', data:{labels:[], datasets:[{data:[], borderRadius:5, maxBarThickness:54}]},
-  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},
-    tooltip:{callbacks:{label:c => c.parsed.y + ' investigadores/as'}}},
-    scales:{x:sinGrid, y:Object.assign({beginAtZero:true},conGrid)}}
-});
-
-function up(ch, data, colors, labels, keys){
-  if(labels) ch.data.labels = labels;
-  if(keys) ch._keys = keys;
-  ch.data.datasets[0].data = data;
-  if(colors) ch.data.datasets[0].backgroundColor = colors;
-  ch.update();
-}
-
-const RANK_ESTADO = {'Finalizado':0,'En proceso':1,'En espera':2,'Detenido':3,'Derivado':4,'Desistido':5};
-const ORDEN = {col:'a', dir:-1};
-
-function comparar(x, y){
-  const k = ORDEN.col, d = ORDEN.dir;
-  let r;
-  if(k === 'a')       r = x.a - y.a;
-  else if(k === 'e')  r = RANK_ESTADO[x.e] - RANK_ESTADO[y.e];
-  else if(k === 'id') r = String(x.id).localeCompare(String(y.id), 'es', {numeric:true});
-  else                r = String(x[k] || '~').localeCompare(String(y[k] || '~'), 'es');
-  if(r !== 0) return k === 'e' ? r : r * d;
-  // desempate por defecto: fecha reciente primero, luego estado de Finalizado a Desistido
-  return (y.a - x.a) || (RANK_ESTADO[x.e] - RANK_ESTADO[y.e]) || String(x.id).localeCompare(String(y.id), 'es', {numeric:true});
-}
-
-function ordenar(col){
-  if(ORDEN.col === col) ORDEN.dir *= -1;
-  else { ORDEN.col = col; ORDEN.dir = (col === 'a') ? -1 : 1; }
-  render();
-}
-
-function render(){
-  // --- barra de filtros ---
-  const fb = document.getElementById('filterbar');
-  const chips = [];
-  for(const d of Object.keys(F)){
-    F[d].forEach(v => {
-      const txt = d === 'k' ? (DATA.find(r => r.k === v) || {}).inv : v;
-      chips.push(`<span class="fchip" onclick="toggle('${d}', ${typeof v === 'number' ? v : "'" + String(v).replace(/'/g,"\\'") + "'"})"><span class="dim">${DIM_LABEL[d]}:</span> ${txt} <span class="x">×</span></span>`);
-    });
-  }
-  const anioSel = `<span class="fb-label">Año</span><span class="yearbar">`
-    + `<button class="ybtn${F.a.size ? '' : ' on'}" onclick="F.a.clear(); F.pr.clear(); render();">Todos</button>`
-    + ORD_ANIO.map(y => `<button class="ybtn${F.a.has(y) ? ' on' : ''}" onclick="toggle('a', ${y})">${y}</button>`).join('')
-    + `</span>`;
-  const total = sel().length;
-  fb.innerHTML = (chips.length
-      ? `${anioSel}<span class="fb-label">Filtros</span>${chips.join('')}<span class="clearall" onclick="limpiar()">Limpiar todo</span>`
-      : `${anioSel}<span class="fb-none">Clic en cualquier gráfico para filtrar</span>`)
-    + `<span class="fb-count"><b>${total}</b> de ${DATA.length} solicitudes</span>`;
-
-  // --- KPIs ---
-  const s = sel();
-  const cerr = s.filter(r => r.e === 'Finalizado').length;
-  const act = s.filter(r => ['En espera','En proceso','Detenido'].includes(r.e)).length;
-  const invs = new Set(s.map(r => r.k));
-  const cnt = {}; s.forEach(r => cnt[r.k] = (cnt[r.k]||0)+1);
-  const recu = Object.values(cnt).filter(n => n > 1).length;
-  const ciclos = s.filter(r => r.c !== null && !r.lp).map(r => r.c);
-  document.getElementById('kpis').innerHTML = `
-    <div class="kpi t"><span class="n">${s.length}</span><span class="lbl">Solicitudes</span><span class="foot">${chips.length ? 'en la selección' : 'total 2024–2026'}</span></div>
-    <div class="kpi t"><span class="n">${cerr}</span><span class="lbl">Cerradas</span><span class="foot">${s.length ? Math.round(100*cerr/s.length) : 0}% de la selección</span></div>
-    <div class="kpi a"><span class="n">${act}</span><span class="lbl">Activas</span><span class="foot">en espera, en proceso o detenidas</span></div>
-    <div class="kpi i"><span class="n">${invs.size}</span><span class="lbl">Investigadores/as</span><span class="foot">${new Set(s.map(r=>r.f)).size} unidades</span></div>
-    <div class="kpi i"><span class="n">${invs.size ? Math.round(100*recu/invs.size) : 0}%</span><span class="lbl">Recurrencia</span><span class="foot">${recu} han vuelto a solicitar</span></div>
-    <div class="kpi c"><span class="n">${mediana(ciclos)}</span><span class="lbl">Días hábiles de ciclo</span><span class="foot">mediana, del inicio real al cierre</span></div>`;
-
-  // --- franja de flujo ---
-  const nNop = s.filter(r => ['Desistido','Derivado'].includes(r.e)).length;
-  const nCer = s.filter(r => r.e === 'Finalizado').length;
-  const nAct = s.filter(r => ['En espera','En proceso','Detenido'].includes(r.e)).length;
-  const tot = Math.max(s.length, 1);
-  const pct = n => (100*n/tot).toFixed(1) + '%';
-  const catCnt = {};
-  s.filter(r => r.cat).forEach(r => catCnt[r.cat] = (catCnt[r.cat]||0)+1);
-  const catTxt = Object.entries(catCnt).sort((a,b)=>b[1]-a[1]).map(([k,v]) => k.toLowerCase() + ' ' + v).join(' · ');
-  document.getElementById('flujo').innerHTML = `
-    <h3>Qué pasa con las ${s.length} solicitudes</h3>
-    <p class="note">No toda solicitud recibida se convierte en trabajo: algunas no llegan a ejecutarse. Este es el desglose completo, sin superposición.</p>
-    <div class="fl-bar">
-      ${nCer ? `<div class="fl-seg cerr" style="width:${pct(nCer)}">${nCer} cerradas</div>` : ''}
-      ${nAct ? `<div class="fl-seg act" style="width:${pct(nAct)}">${nAct} activas</div>` : ''}
-      ${nNop ? `<div class="fl-seg nop" style="width:${pct(nNop)}">${nNop} no prosperaron</div>` : ''}
-    </div>
-    <div class="fl-leg">
-      <div class="fl-item cerr"><b>${nCer} cerradas</b> — el análisis se entregó y el investigador aprobó el resultado. Es el trabajo terminado.</div>
-      <div class="fl-item act"><b>${nAct} activas</b> — en curso hoy: en espera de datos o comentarios, en análisis, o detenidas por causa externa al equipo.</div>
-      <div class="fl-item nop"><b>${nNop} no prosperaron</b> — desistidas o derivadas antes de ejecutarse. ${catTxt ? 'Motivos: ' + catTxt + '.' : ''} El detalle está en la tabla de abajo.</div>
-    </div>`;
-
-  // --- gráficos de demanda (excluyen su propia dimensión) ---
-  up(CH.estado, conteo(sel('e'),'e',ORD_ESTADO), colores(ORD_ESTADO,'e',o => COL_ESTADO[o]));
-  up(CH.fac, conteo(sel('f'),'f',ORD_FAC), colores(ORD_FAC,'f',AMBAR));
-  up(CH.tipo, conteo(sel('t'),'t',ORD_TIPO), colores(ORD_TIPO,'t',AZUL));
-
-  // --- capacidad ---
-  const rec = sel('a'), NO_PROSPERO = ['Desistido','Derivado'];
-  CH.anio.data.datasets[0].data = ORD_ANIO.map(y => rec.filter(r => r.a === y && !NO_PROSPERO.includes(r.e)).length);
-  CH.anio.data.datasets[1].data = ORD_ANIO.map(y => rec.filter(r => r.a === y &&  NO_PROSPERO.includes(r.e)).length);
-  CH.anio.data.datasets[2].data = ORD_ANIO.map(y => sel('ac').filter(r => r.ac === y).length);
-  CH.anio.data.datasets[0].backgroundColor = colores(ORD_ANIO,'a','#8FA39D');
-  CH.anio.data.datasets[1].backgroundColor = colores(ORD_ANIO,'a','rgba(143,163,157,0.30)');
-  CH.anio.data.datasets[2].backgroundColor = colores(ORD_ANIO,'ac',TEAL);
-  CH.anio.update();
-
-  // --- tiempos por etapa ---
-  const meta = TRAMOS.map(([lbl,a,b]) => {
-    const v = s.map(r => habiles(r[a], r[b])).filter(x => x !== null && x >= 0);
-    return {lbl, n:v.length, med:mediana(v), prom:promedio(v)};
-  });
-  CH.etapas._meta = meta;
-  meta.slice(0,5).forEach((e,i) => { CH.etapas.data.datasets[i].data = [e.prom]; });
-  CH.etapas.update();
-  const totalProm = meta.slice(0,5).reduce((a,x)=>a+x.prom,0);
-  document.getElementById('tabla-etapas').innerHTML = `
-    <table class="mini"><thead><tr><th>Etapa</th><th>Promedio</th><th>Mediana</th><th>n</th></tr></thead><tbody>
-    ${meta.slice(0,5).map((e,i)=>`<tr><td><span class="dot-col" style="background:${COL_TRAMO[i]}"></span>${e.lbl}</td>
-      <td class="num">${e.prom}</td><td class="num">${e.med}</td><td class="num">${e.n}</td></tr>`).join('')}
-    <tr class="tot"><td>Proceso completo</td><td class="num">${totalProm}</td><td class="num">${meta[5].med}</td><td class="num">${meta[5].n}</td></tr>
-    </tbody></table>`;
-
-  const cic = s.map(r => r.nc).filter(x => x !== null && x !== undefined);
-  up(CH.ciclos, [0,1,2,3].map(k => cic.filter(x => x === k).length));
-
-  const cuello = meta.slice(0,5).filter(x=>x.n>0).sort((a,b)=>b.med-a.med)[0];
-  const resp = meta[0];
-  document.getElementById('lede-etapas').innerHTML = cuello
-    ? `La respuesta al investigador toma <strong>${resp.med} días hábiles</strong> de mediana sobre ${resp.n} requerimientos: el compromiso de 5 días se cumple con holgura. El tramo más largo es <strong>${cuello.lbl.toLowerCase()}</strong>, con ${cuello.med} días hábiles de mediana y ${cuello.prom} de promedio. La diferencia entre mediana y promedio indica cuántos casos extremos estiran la cola.`
-    : 'Sin requerimientos con fechas de etapa en la selección actual.';
-
-  // --- recurrencia ---
-  const arr = Object.entries(cnt).sort((a,b) => b[1]-a[1]);
-  const maxN = arr.length ? arr[0][1] : 1;
-  const distLbl = [], distVal = [];
-  for(let i = 1; i <= Math.max(maxN,1); i++){
-    const q = arr.filter(([,n]) => n === i).length;
-    if(q > 0){ distLbl.push(i === 1 ? '1 solicitud' : i + ' solicitudes'); distVal.push(q); }
-  }
-  up(CH.recdist, distVal, distLbl.map((l,i) => i === 0 ? GRIS : AZUL), distLbl);
-
-  const solRec = arr.filter(([,n]) => n > 1).reduce((a,[,n]) => a+n, 0);
-  document.getElementById('lede-recurrencia').innerHTML = invs.size
-    ? `<strong>${recu} de ${invs.size} investigadores/as (${Math.round(100*recu/invs.size)}%) han vuelto a solicitar apoyo</strong>, y concentran <strong>${solRec} de las ${s.length} solicitudes (${Math.round(100*solRec/s.length)}%)</strong>. Poco más de un tercio de la carga proviene de gente que ya conocía el servicio: es el indicador más directo de que el trabajo entregado sirvió.`
-    : 'Sin investigadores en la selección actual.';
-
-  // --- tabla ---
-  const tb = document.getElementById('tbody');
-  ['id','a','f','e','met'].forEach(k => {
-    const el = document.getElementById('s-' + k);
-    if(el) el.textContent = (ORDEN.col === k) ? (ORDEN.dir === 1 ? ' ▲' : ' ▼') : '';
-  });
-  tb.innerHTML = s.slice().sort(comparar)
-    .map(r => `<tr><td class="cod">${r.id}</td><td class="cod">${r.a}</td><td>${r.f}</td>
-      <td><span class="chip ${r.e.replace(/\s/g,'')}">${r.e}</span></td>
-      <td class="met">${r.met ? r.met : (r.mot ? `<span class="motivo"><span class="cat">${r.cat}</span> ${r.mot}</span>` : '<span class="nd">—</span>')}</td></tr>`).join('');
-  document.getElementById('tempty').style.display = s.length ? 'none' : 'block';
-}
+// __RESUMEN_METRICAS_START__
+const RESUMEN_METRICAS = {
+  total: 66,
+  fuente: 'Hoja consolidada del formulario, histórico + año en curso.',
+  actualizado: '2026-08-10',
+  porEstado: [
+    {label:'Finalizado', n:36},
+    {label:'Desistido', n:14},
+    {label:'En espera', n:8},
+    {label:'En proceso', n:3},
+    {label:'Sin información', n:3},
+    {label:'Derivado', n:2}
+  ],
+  porTipoApoyo: [
+    {label:'Análisis estadístico', n:49},
+    {label:'Gestión de datos', n:28},
+    {label:'Visualización de datos', n:28},
+    {label:'Preprocesamiento de datos', n:26},
+    {label:'Reporte de resultados', n:23},
+    {label:'Otros (calidad de datos, tamaño muestral, metodología)', n:3}
+  ],
+  porFacultad: [
+    {label:'Facultad de Ciencias Sociales', n:20},
+    {label:'Facultad de Odontología', n:9},
+    {label:'Facultad de Medicina', n:9},
+    {label:'Facultad de Comunicación', n:7},
+    {label:'Facultad de Enfermería y Obstetricia', n:5},
+    {label:'Clínica UAndes', n:3},
+    {label:'CIIB', n:3},
+    {label:'Dirección de Innovación', n:3},
+    {label:'CIIL Uandes', n:2},
+    {label:'Dirección de Investigación y Doctorado', n:2},
+    {label:'Otras unidades (Ing., Economía, CEG)', n:3}
+  ],
+  porAnio: [
+    {label:'2024', n:30},
+    {label:'2025', n:12},
+    {label:'2026 (a la fecha)', n:24}
+  ]
+};
+// __RESUMEN_METRICAS_END__
 
 /* =========================================================================
-   FORMACIÓN EN R — datos independientes del resto del panel.
-   Fuente: planillas de asistencia y carpetas de proyectos de cada curso.
+   RENDERIZADO — no toca los datos, solo dibuja.
    ========================================================================= */
-const CURSOS = [
-  {nombre:'Introducción a R para análisis estadístico', nivel:'Intermedio', tipo:'Curso',
-   inicio:'15 abr 2025', fin:'29 abr 2025', sesiones:6, inscritos:52, asistieron:43, proyectos:10},
-  {nombre:'Fundamentos básicos para el análisis de datos con R', nivel:'Inicial', tipo:'Curso',
-   inicio:'30 sep 2025', fin:'14 oct 2025', sesiones:5, inscritos:41, asistieron:20, proyectos:3},
-  {nombre:'Data Science y uso de IA — Doctorado en Odontología', nivel:'Aplicado', tipo:'Capacitación',
-   inicio:'12 jun 2026', fin:'12 jun 2026', sesiones:1, inscritos:3, asistieron:3, proyectos:0},
-  {nombre:'Análisis de datos en R con apoyo de IA', nivel:'Aplicado', tipo:'Curso',
-   inicio:'octubre 2026', fin:'', sesiones:0, inscritos:null, asistieron:null, proyectos:0, programado:true}
-];
 
-// Composición de los dos cursos con registro de inscripción (93 inscripciones, 89 personas únicas).
-const CURSO_ROL = [
-  {label:'Estudiante de Magíster', n:30},
-  {label:'Estudiante de Doctorado', n:23},
-  {label:'Docente o Académico/a', n:19},
-  {label:'Investigador/a', n:18},
-  {label:'Otro o sin dato', n:3}
-];
-const CURSO_FAC = [
-  {label:'Medicina', n:27},
-  {label:'CIIB', n:11},
-  {label:'Cs. Económicas y Empresariales', n:9},
-  {label:'Comunicación', n:9},
-  {label:'Ingeniería y Cs. Aplicadas', n:9},
-  {label:'Ciencias Sociales', n:7},
-  {label:'Enfermería y Obstetricia', n:6},
-  {label:'Odontología', n:4},
-  {label:'Otras unidades', n:11}
-];
+function renderBars(containerId, data, colorVar){
+  const container = document.getElementById(containerId);
+  const max = Math.max(...data.map(d=>d.n));
+  container.innerHTML = data.map(d=>`
+    <div class="bar-row">
+      <div class="bar-label"><span>${d.label}</span><span class="n">${d.n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(d.n/max*100).toFixed(0)}%; background:${colorVar||'var(--teal)'}"></div></div>
+    </div>`).join('');
+}
 
-const CURSO_CONVERSION = {personas:8, solicitudes:18};
+document.getElementById('metrics-total').innerHTML =
+  `<strong>${RESUMEN_METRICAS.total}</strong> solicitudes registradas &nbsp;·&nbsp; ${RESUMEN_METRICAS.fuente}`;
 
-(function(){
-  const DICTADOS = CURSOS.filter(c => !c.programado);
-  const totalInscritos = DICTADOS.reduce((a,c)=> a + (c.inscritos || 0), 0);
-  const totalProy = DICTADOS.reduce((a,c)=> a + c.proyectos, 0);
-  const totalSes = DICTADOS.reduce((a,c)=> a + c.sesiones, 0);
-
-  document.getElementById('kpis-curso').innerHTML = `
-    <div class="kpi t"><span class="n">${DICTADOS.length}</span><span class="lbl">Actividades dictadas</span><span class="foot">2 cursos y 1 capacitación · 1 más programado</span></div>
-    <div class="kpi t"><span class="n">${totalSes}</span><span class="lbl">Sesiones</span><span class="foot">${CURSOS.map(c=>c.sesiones).join(' + ')}</span></div>
-    <div class="kpi i"><span class="n">${totalInscritos}</span><span class="lbl">Participantes</span><span class="foot">92 personas distintas</span></div>
-    <div class="kpi a"><span class="n">${totalProy}</span><span class="lbl">Proyectos finales</span><span class="foot">con datos propios del participante</span></div>
-    <div class="kpi c"><span class="n">${CURSO_CONVERSION.solicitudes}</span><span class="lbl">Solicitudes posteriores</span><span class="foot">de ${CURSO_CONVERSION.personas} asistentes</span></div>`;
-
-  const insc = CURSOS.reduce((a,c)=> a + (c.inscritos||0), 0);
-  const asis = CURSOS.reduce((a,c)=> a + (c.asistieron||0), 0);
-  document.getElementById('lede-curso').innerHTML =
-    `De los <strong>${insc} participantes</strong> registrados, ${asis} asistieron al menos una sesión y ${totalProy} entregaron un proyecto final con datos propios. Posteriormente <strong>${CURSO_CONVERSION.personas} participantes ingresaron ${CURSO_CONVERSION.solicitudes} requerimientos formales</strong> por el formulario: algo más de un cuarto de la demanda histórica del equipo proviene de personas que pasaron por una actividad de formación.`;
-
-  document.getElementById('cursos-body').innerHTML = CURSOS.map(c=>`
-    <tr${c.programado ? ' style="opacity:.72"' : ''}>
-      <td>${c.nombre}${c.programado ? ' <span class="cat" style="background:var(--indigo-soft); color:var(--indigo)">programado</span>' : ''}<br><span class="cod">${c.tipo.toLowerCase()} · nivel ${c.nivel.toLowerCase()}</span></td>
-      <td class="cod">${c.fin ? c.inicio + ' — ' + c.fin : c.inicio}</td>
-      <td class="cod">${c.sesiones || '<span class="nd">—</span>'}</td>
-      <td class="cod">${c.inscritos !== null ? c.inscritos : '<span class="nd">—</span>'}</td>
-      <td class="cod">${c.programado ? '<span class="nd">—</span>' : c.proyectos}</td>
-    </tr>`).join('');
-
-  new Chart(document.getElementById('c-rol'), {
-    type:'doughnut',
-    data:{labels:CURSO_ROL.map(x=>x.label), datasets:[{data:CURSO_ROL.map(x=>x.n),
-      backgroundColor:[AZUL,'#5C6CA6',AMBAR,TEAL,GRIS], borderWidth:2, borderColor:'#fff'}]},
-    options:{responsive:true, maintainAspectRatio:false, cutout:'55%',
-      plugins:{legend:{position:'right', labels:{boxWidth:10, boxHeight:10, padding:10, usePointStyle:true, pointStyle:'circle'}}}}
-  });
-
-  new Chart(document.getElementById('c-facCurso'), {
-    type:'bar',
-    data:{labels:CURSO_FAC.map(x=>x.label), datasets:[{data:CURSO_FAC.map(x=>x.n),
-      backgroundColor:AMBAR, borderRadius:5, maxBarThickness:20}]},
-    options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}}, scales:{y:sinGrid, x:Object.assign({beginAtZero:true},conGrid)}}
-  });
-})();
-
-/* Otras líneas de trabajo — resumen agregado, sin nombres. */
-(function(){
-  document.getElementById('otras-agente').innerHTML = `
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>tareas automáticas en marcha</b> — vigilancia diaria de convocatorias de fondos con matching contra el portafolio, y consulta de perfiles y proyectos a demanda.</span></div>
-    <div class="ot-fila"><span class="ot-n">48</span><span class="ot-t"><b>días operando</b> desde el 25 de junio de 2026, con notificación casi diaria a la Dirección.</span></div>
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>solicitudes individuales</b> recibidas de usuarios de la Dirección: una resuelta y una en curso. Son las que consumen tiempo del equipo; el resto corre solo.</span></div>
-    <div class="ot-fila"><span class="ot-n">8</span><span class="ot-t"><b>de 18 componentes</b> de la plataforma de ingreso de datos ya en producción. Al completarse reemplaza a la planilla que hoy alimenta el portafolio.</span></div>
-    <div class="ot-fila"><span class="ot-n">11</span><span class="ot-t"><b>reportes de usuarios</b> consolidados desde marzo de 2026: 6 errores y 5 propuestas de mejora, llegados por canales informales y reunidos en un registro único.</span></div>`;
-
-  document.getElementById('otras-papers').innerHTML = `
-    <div class="ot-fila"><span class="ot-n">3</span><span class="ot-t"><b>papers con participación del equipo</b> en la autoría, no solo en el apoyo metodológico.</span></div>
-    <div class="ot-fila"><span class="ot-n">1</span><span class="ot-t"><b>enviado a revista</b>, a la espera de respuesta editorial desde julio 2026.</span></div>
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>en desarrollo</b>, uno de ellos derivado de un requerimiento en curso, donde el equipo cumple doble rol de analista y coautor.</span></div>`;
-})();
-
-render();
+renderBars('metric-estado', RESUMEN_METRICAS.porEstado, 'var(--teal)');
+renderBars('metric-tipo', RESUMEN_METRICAS.porTipoApoyo, 'var(--indigo)');
+renderBars('metric-facultad', RESUMEN_METRICAS.porFacultad, 'var(--amber)');
+renderBars('metric-anio', RESUMEN_METRICAS.porAnio, 'var(--coral)');
+document.getElementById('updated-note').textContent = 'Última actualización de los datos: ' + RESUMEN_METRICAS.actualizado;
 </script>
 </body>
 </html>
