@@ -83,30 +83,29 @@ ids_data <- vapply(data_actual, function(r) as.character(r$id), character(1))
 # 4. Emparejar por Id: separar en (a) filas existentes con estado distinto,
 #    (b) solicitudes nuevas que no tienen fila en DATA todavia.
 # ---------------------------------------------------------------------------
-# El id en DATA es, para historicas, "<Id>_1"; para las mas recientes, "<Id>"
-# a secas. Probamos ambas formas contra lo que trae el export.
-candidatos_id <- function(id_raw) unique(c(id_raw, paste0(id_raw, "_1")))
-
+# El export.csv ya trae el id EXACTAMENTE en el mismo formato que DATA (la
+# hoja "Antiguo" del Excel ya incluye el sufijo "_1" en su propia columna Id;
+# la hoja "Nuevo" no lo lleva). Por eso la coincidencia debe ser EXACTA, sin
+# adivinar sufijos: dos hojas distintas reinician su numeración y un id
+# "30" de "Nuevo" puede coincidir por casualidad con el id "30_1" de
+# "Antiguo", que es una solicitud completamente distinta.
 cambios <- list()
 nuevas  <- list()
 
 for (i in seq_len(nrow(export))) {
   fila <- export[i, ]
-  candidatos <- candidatos_id(fila$id_raw)
-  idx <- which(ids_data %in% candidatos)
+  idx <- which(ids_data == fila$id_raw)
 
   if (length(idx) == 0) {
     nuevas[[length(nuevas) + 1]] <- fila
-  } else if (length(idx) == 1) {
-    fila_data <- data_actual[[idx]]
+  } else {
+    fila_data <- data_actual[[idx[[1]]]]
     if (!identical(fila_data$e, fila$estado)) {
       cambios[[length(cambios) + 1]] <- list(
         id = fila_data$id, estado_anterior = fila_data$e, estado_nuevo = fila$estado
       )
-      data_actual[[idx]]$e <- fila$estado
+      data_actual[[idx[[1]]]]$e <- fila$estado
     }
-  } else {
-    warning("Id ambiguo, se omite: ", fila$id_raw)
   }
 }
 
@@ -125,6 +124,13 @@ if (length(cambios) == 0 && length(nuevas) == 0) {
 if (length(cambios) > 0) {
   data_json_nuevo <- toJSON(data_actual, auto_unbox = TRUE, null = "null")
   html_nuevo <- str_replace(html, patron_data, paste0("const DATA = ", data_json_nuevo, ";"))
+
+  patron_fecha <- "const LAST_UPDATE = '[^']*';"
+  fecha_nueva <- sprintf("const LAST_UPDATE = '%s';", format(Sys.Date(), "%Y-%m-%d"))
+  if (str_detect(html_nuevo, patron_fecha)) {
+    html_nuevo <- str_replace(html_nuevo, patron_fecha, fecha_nueva)
+  }
+
   write_file(html_nuevo, ruta_panel)
 
   cat(sprintf("OK: %d solicitud(es) con estado actualizado en %s:\n", length(cambios), ruta_panel))
