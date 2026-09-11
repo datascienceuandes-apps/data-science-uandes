@@ -450,17 +450,13 @@
   <div class="eyebrow">// equipo-data-science / proceso.md</div>
   <h1>Cómo trabajamos las solicitudes de apoyo en datos</h1>
   <p class="subhead">
-    Documento vivo del equipo: mapa del proceso, catálogo de metodologías aplicadas y hoja de ruta de
-    tareas por explorar. Editable directamente aquí — los datos viven en el bloque
-    <code>&lt;script&gt;</code> al final del archivo, en los arrays <code>PROCESO</code>,
-    <code>METODOLOGIAS</code>, <code>ROADMAP</code> y <code>ESTADOS</code>.
+    Documento con mapa del proceso, catálogo de metodologías aplicadas y hoja de ruta de tareas.
   </p>
   <p class="subhead"><a href="panel/" style="color:#145C54; font-family:'IBM Plex Mono', monospace; font-size:12.5px;">Ver panel ejecutivo (métricas) &rarr;</a></p>
 
   <nav class="tabbar" role="tablist">
     <button class="tab active" data-tab="proceso" style="--dotcolor:var(--teal)" role="tab"><span class="dot"></span>proceso.flow</button>
     <button class="tab" data-tab="catalogo" style="--dotcolor:var(--indigo)" role="tab"><span class="dot"></span>catalogo.metodologias</button>
-    <button class="tab" data-tab="agente" style="--dotcolor:#3D4E8C" role="tab"><span class="dot"></span>agente.tareas</button>
     <button class="tab" data-tab="formacion" style="--dotcolor:#6B7A3A" role="tab"><span class="dot"></span>formacion.cursos</button>
     <button class="tab" data-tab="roadmap" style="--dotcolor:var(--amber)" role="tab"><span class="dot"></span>futuro.roadmap</button>
   </nav>
@@ -503,17 +499,6 @@
   </section>
 
 
-
-  <!-- ============ TAB: AGENTE ============ -->
-  <section class="panel" id="panel-agente">
-    <h2 class="panel-title">Agente de la plataforma de portafolio</h2>
-    <p class="panel-desc">El equipo desarrolla y opera una plataforma de visualización del portafolio de innovación, y sobre ella un agente automatizado que trabaja de forma continua para la Dirección. Estas son las tareas que ejecuta.</p>
-
-    <div class="card-grid" id="agente-tareas"></div>
-
-    <h3 class="metric-heading" style="margin-top:28px">Cómo se solicita</h3>
-    <p class="method-desc" style="max-width:76ch">El agente atiende por correo. Cualquier persona de la Dirección puede escribirle para pedir información del portafolio, ajustar los criterios de una búsqueda o solicitar un reporte específico. Las solicitudes que implican cambiar la lógica del agente pasan al equipo y se tratan como desarrollo, no como consulta.</p>
-  </section>
 
   <!-- ============ TAB: FORMACIÓN ============ -->
   <section class="panel" id="panel-formacion">
@@ -806,30 +791,6 @@ document.getElementById('search-input').addEventListener('input', (e)=>{
 setupFilters();
 
 
-
-/* ---------- Agente ---------- */
-const AGENTE_TAREAS = [
-  {nombre:'Vigilancia de convocatorias de fondos', tipo:'Automática · diaria',
-   desc:'Revisa las páginas de fondos definidas, detecta convocatorias con plazo vigente y compara cada una contra el portafolio de innovación para proponer coincidencias con proyectos y capacidades de la universidad.',
-   salida:'Correo diario a la Dirección con las convocatorias nuevas y sus coincidencias.'},
-  {nombre:'Consulta del portafolio y de perfiles académicos', tipo:'Automática · a demanda',
-   desc:'Responde preguntas sobre proyectos, tecnologías y perfiles de investigadores registrados en el portafolio, sin que la persona tenga que navegar la plataforma.',
-   salida:'Respuesta por correo con la información solicitada.'},
-  {nombre:'Reportes operativos por fondo', tipo:'Solicitud individual',
-   desc:'A pedido de un usuario, elabora un reporte enfocado en un fondo concreto: estado de la postulación, coincidencias con perfiles de proyecto y documentos asociados.',
-   salida:'Informe operativo y ajustes a los criterios de coincidencia.'},
-  {nombre:'Ajuste de criterios de coincidencia', tipo:'Solicitud individual',
-   desc:'Incorpora o excluye perfiles y afina las reglas con que el agente decide qué proyecto calza con qué convocatoria. Requiere intervención del equipo sobre la lógica del agente.',
-   salida:'Nueva versión de las reglas de matching.'}
-];
-
-document.getElementById('agente-tareas').innerHTML = AGENTE_TAREAS.map(t=>`
-  <div class="method-card">
-    <div class="method-name">${t.nombre}</div>
-    <div class="method-tags"><span class="tag tipo">${t.tipo}</span></div>
-    <p class="method-desc">${t.desc}</p>
-    <p class="method-example">Entrega: ${t.salida}</p>
-  </div>`).join('');
 
 /* ---------- Formación ---------- */
 const CURSOS = [

@@ -162,17 +162,17 @@
   <div class="grid grid-3">
     <div class="card">
       <h3>Estado de los requerimientos</h3>
-      <p class="note">Finalizado, Derivado y Desistido son terminales. <span class="hint">Clic para filtrar.</span></p>
+      <p class="note">Finalizado, Derivado y Desistido son terminales. </p>
       <div class="chart-wrap"><canvas id="c-estado"></canvas></div>
     </div>
     <div class="card">
       <h3>Por facultad o unidad</h3>
-      <p class="note">11 unidades atendidas. <span class="hint">Clic para filtrar.</span></p>
+      <p class="note">11 unidades atendidas. </p>
       <div class="chart-wrap tall"><canvas id="c-fac"></canvas></div>
     </div>
     <div class="card">
       <h3>Por tipo de apoyo solicitado</h3>
-      <p class="note">Selección múltiple en el formulario. <span class="hint">Clic para filtrar.</span></p>
+      <p class="note">Selección múltiple en el formulario. </p>
       <div class="chart-wrap tall"><canvas id="c-tipo"></canvas></div>
     </div>
   </div>
@@ -247,22 +247,6 @@
       <h3>Participantes por facultad o unidad</h3>
       <p class="note">Catorce unidades representadas, varias que aún no han solicitado apoyo formal.</p>
       <div class="chart-wrap tall"><canvas id="c-facCurso"></canvas></div>
-    </div>
-  </div>
-
-  <h2>Otras líneas de trabajo</h2>
-  <p class="h2sub">Además de los requerimientos de investigadores, el equipo sostiene una plataforma con un agente automatizado y participa en publicaciones propias. No responden a los filtros del panel.</p>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Agente de la plataforma de portafolio</h3>
-      <p class="note">Servicio automatizado para la Dirección de Innovación, en marcha desde junio 2026.</p>
-      <div class="otras" id="otras-agente"></div>
-    </div>
-    <div class="card">
-      <h3>Publicaciones propias</h3>
-      <p class="note">Papers con participación del equipo en la autoría.</p>
-      <div class="otras" id="otras-papers"></div>
     </div>
   </div>
 
@@ -696,21 +680,6 @@ const CURSO_CONVERSION = {personas:8, solicitudes:18};
     options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{legend:{display:false}}, scales:{y:sinGrid, x:Object.assign({beginAtZero:true},conGrid)}}
   });
-})();
-
-/* Otras líneas de trabajo — resumen agregado, sin nombres. */
-(function(){
-  document.getElementById('otras-agente').innerHTML = `
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>tareas automáticas en marcha</b> — vigilancia diaria de convocatorias de fondos con matching contra el portafolio, y consulta de perfiles y proyectos a demanda.</span></div>
-    <div class="ot-fila"><span class="ot-n">48</span><span class="ot-t"><b>días operando</b> desde el 25 de junio de 2026, con notificación casi diaria a la Dirección.</span></div>
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>solicitudes individuales</b> recibidas de usuarios de la Dirección: una resuelta y una en curso. Son las que consumen tiempo del equipo; el resto corre solo.</span></div>
-    <div class="ot-fila"><span class="ot-n">8</span><span class="ot-t"><b>de 18 componentes</b> de la plataforma de ingreso de datos ya en producción. Al completarse reemplaza a la planilla que hoy alimenta el portafolio.</span></div>
-    <div class="ot-fila"><span class="ot-n">11</span><span class="ot-t"><b>reportes de usuarios</b> consolidados desde marzo de 2026: 6 errores y 5 propuestas de mejora, llegados por canales informales y reunidos en un registro único.</span></div>`;
-
-  document.getElementById('otras-papers').innerHTML = `
-    <div class="ot-fila"><span class="ot-n">3</span><span class="ot-t"><b>papers con participación del equipo</b> en la autoría, no solo en el apoyo metodológico.</span></div>
-    <div class="ot-fila"><span class="ot-n">1</span><span class="ot-t"><b>enviado a revista</b>, a la espera de respuesta editorial desde julio 2026.</span></div>
-    <div class="ot-fila"><span class="ot-n">2</span><span class="ot-t"><b>en desarrollo</b>, uno de ellos derivado de un requerimiento en curso, donde el equipo cumple doble rol de analista y coautor.</span></div>`;
 })();
 
 document.getElementById('ultima-actualizacion').textContent = 'Última actualización de los datos: ' + LAST_UPDATE;
